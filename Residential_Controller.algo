@@ -1,112 +1,221 @@
-SET Column to contain
-    callButtons 1 to 10  and up and down as an array
-    ElevatorA
-    ElevatorB
+DEFINE BuildingSpecs USING floors AND collumns AND elevators
+    Floors : floors
+    Collumns : collumns
+    Elevators : elevators
+ENDDEFINE
+
+DEFINE Column USING floors AND elevators
+    CallButtons : SET to empty list
+    Elevators : SET to empty list
+
+    SEQUENCE create_callButtons USING floors
+        FOR every floor
+            SET callButtonUp to INSTANTIATE callButton WITH floor AND Up
+            SET callButtonDown to INSTANTIATE callButton WITH floor AND Down
+            ADD callButtonUP to callButtons
+            ADD callButtonDown to callButtons
+        ENDFOR
+    ENDSEQUENCE
+    SEQUENCE create_elevators USING elevators
+        FOR every elevator
+            SET Elevator to INSTANTIATE Elevator WITH elevator AND O AND floors 
+        ENDFOR
+    ENDSEQUENCE
+ENDDEFINE      
+
+DEFINE CallButton USING floor AND direction
+    Number : floor
+    Direction : direction
+    IsPressed : false
+ENDDEFINE
+
+DEFINE Elevator USING id AND Location AND floors
+    ID: id
+    FloorNumber : location
+    Movement : SET to false 'can be : up, down, or false'
+    FloorRequestButtons : SET to an empty list 
+    DestinationFloor : null
+    Distance : null
+    Doors: SET to Object
+
+    SEQUENCE create_FloorRequestButtons USING floors
+        FOR every floor
+            SET FloorRequestButton to INSTANTIATE FloorRequestButton WITH floor
+            ADD FloorRequestButton to FloorRequestButtons
+        ENDFOR
+    ENDSEQUENCE
+    SEQUENCE create_Doors 
+        SET doors to INSTANTIATE Doors
+    ENDSEQUENCE
+
+ENDDEFINE
+
+DEFINE FloorRequestButton USING floor
+    Number: floor
+    IsPressed :false
+ENDDEFINE
 
 
-SET ElevatorA and ElevatorB to contain
-    floorNumber
-    movement can be : up, down, false
-    floorRequestButtons 1 to 10 as an array
-    doors
-    destinationFloor
+DEFINE Doors 
+    Open : false
+    OpenTime: 5sec
+    SafeToClose : true
+    PassengerDetector : false
+ENDDEFINE
 
-Set doors to conatain
-    open
-    openTime
-    safeToClose
+SET BUILDING to INSTANTIATE BuildingSpecs WITH 10 AND 1 AND 2
+SET COLUMN to INSTANTIATE Column WITH BUILDING Floors AND BUILDING Elevators
+
+
+set requests to empty list
+'sort sequence EDX week 3'
+'compare values array'
+set calls to empty list
+
+
+ENDSEQUENCE
   
-Sequence findClosestElevator
-    SET distanceA to difference between elevatorA's floor and calledTo
-    SET distanceB to difference between elevatorB's floor and calledTo
-    IF magnitude of distanceA > magnitude of distanceB 
-        Then Set closestElevator to elevatorB and otherElevator to elevatorA
-        ELSE SET closestElevator to elevatorA and otherElevator to elevatorB
-EndSequence
+SEQUENCE findClosestElevator USING calledTo AND Column
+    
+    FOR every  Column Elevator 
+        SET Elevator distance to magnitude of Elevator floorNumber - calledTo) 'magnitude is the unsigned value of the variable'
+    ENDFOR
+    SORT Column Elevators by ascending distance
+    SET closestElevator to first elevator of Column Elevators
 
 
-Sequence DoorsAction
-    SET doors' open to true
+
+SEQUENCE doorsAction USING elevator
+    SET elevator Doors open to true
     wait openTime
-    set safeToClose to false
-    while safeToClose is false
-        call checkSafeToClose
-            if safeToClose is true
-                then close doors
-                set doors' open to false
+   
+    SET elevator Doors safeToClose to false
+    WHILE elevator Doors safeToClose is false
+        CALL checkSafeToClose USING elevator Doors
+            IF elevator Doors safeToClose is true
+                THEN close elevator Doors
+                SET elevator Doors open to false
+            ENDIF
+    ENDWHILE
     
-EndSequence
+ENDSEQUENCE
 
-Sequence checkSafeToClose
-    If noone is blocking the Doors
-        Set safeToClose to true
-EndSequence
+SEQUENCE checkSafeToClose USING doors
+    IF doors PassengerDetector is false 'not activated'
+        SET doors SafeToClose to true
+ENDSEQUENCE
 
-Sequence moveElevator
+SEQUENCE moveElevator USING Column Elevator
     
-    while elevator's floorNumber NOT destinationFloor
-        if elevator's destinationFloor > elevator's floorNumber
-            then set elevator's movement to up
-            else set elevator's movement to down
-
-        if  new floor callButton is pressed AND mouvement is same as callbutton
-            then call DoorsAction
-        
-        if elevator's movement is up 
-            then increment elevator's floorNumber by +1
-        else increment elevator's floorNumber by -1
-
-    if elevator's floorNumber is destinationFloor
-        then Set elevator's movement to false
-            call DoorsAction
-            set callButtonNumber of destinationFloor to notPressed
-EndSequence
-
-Sequence usersDestination
-    For every  element in floorRequestButtons 
-        if floorRequestButton is pressed
-            Set destinationFloor to floorRequestButton number
-            call moveElevator
-endSequence
-    
-
-Sequence CallElevatorCheck 
-    set counter to 1
-    While counter <= callButton array length
-        If callButton number (counter) is pressed
-            then add callbutton number to calls array
+    WHILE elevator FloorNumber  IS NOT elevator DestinationFloor
+        IF destinationFloor of elevator  > floorNumber of elevator
+            THEN SET elevator Movement to up
+            INCREMENT floorNumber of elevator by +1
             
-        ELSE if counter < callButton array Length
-                then increment counter by +1
-            else
-            Set counter to 0
+        ELSE 
+            SET elevator Movement to down
+            INCREMENT floorNumber of elevator by -1
+        ENDIF
 
-            For every element in calls array
+        IF  Column Elevator FloorNumber IS IN calls callElement Numbers AND Column Elevator Movement = callElement Direction
+            OR Column Elevator FloorNumber IS IN requests 'call compare values when defined'
+                THEN 
+                    CALL DoorsAction USING Column Elevator
+                    SET callButtons (WITH Number = Column Elevator floorNumber) IsPressed to false
+                    SET FloorRequestButton (WITH Number = Column Elevator floorNumber) IsPressed to false
+                    REMOVE element with number = Column Elevator FloorNumber FROM requests AND calls
+        ENDIF
+    ENDWHILE
+        
+    IF elevator FloorNumber = destinationFloor
+        THEN SET elevator Movement to false
+            CALL DoorsAction USING Column elevator
+            SET callButtons WITH Number = destinationFloor IsPressed to false
+    ENDIF
+    SET elevator destinationFloor to null
+ENDSEQUENCE
 
-                while callbuttonNumber equal to calls array element is pressed
 
-                    call defineElevatorMovement
-                    call findClosestElevator
+SEQUENCE usersDestination USING column
+    CALL pressButton WITH FloorRequestButtons
+    FOR every Column Elevator    
+        FOR every Column Elevator FloorRequestButton
+            IF Column Elevator FloorRequestButton IsPressed = true                
+                ADD Column Elevator FloorRequestButton Number to requests 
+                SORT requests ascending
+                CASE Column Elevator Movement IS up
+                    SET Column Elevator DestinationFloor to  last of requests
+                CASE Column Elevator Movement IS down
+                    SET Column Elevator DestinationFloor to first of requests                   
+                CASE Column Elevator Movement IS false
+                    SET lowest to magnitude of Column Elevator FloorNumber - first of requests
+                    SET highest to magnitude of last of requests - Column Elevator FloorNumber
+                    CASE lowest > highest
+                        SET Column Elevator DestinationFloor to first of requests
+                    CASE lowest < highest
+                        SET Column Elevator DestinationFloor to last of requests
+                    CASE lowest = highest
+                        SET dColumn Elevator DestinationFloor to first of requests
+                    ENDCASE
+                ENDCASE
+            ENDIF
+        ENDFOR
+        CALL moveElevator USING  Column Elevator
+    ENDFOR
+ENDSEQUENCE
+    
+SEQUENCE pressButton USING buttons 
+    FOR all button elements of buttons
+        IF button is pressed
+            SET button IsPressed  to true
+        ENDIF 
+    ENDFOR
+ENDSEQUENCE
+    
+            
 
-                    if closestElevator movement is false
-                        then set closestElevator's destinationFloor  to callButton number
+SEQUENCE CallElevatorCheck USING column
+    
+    CALL pressButton WITH column CallButtons     
+    FOR every CallButton of column CallButtons 
+        If CallButton isPressed = true 
+            THEN ADD callButton to calls 
+        ENDIF
+    ENDFOR
+
+    FOR every callElement of calls 
+
+        CALL findClosestElevator WITH callElement AND column
+        
+        FOR every Elevator in column Elevators
+
+            CASE Elevator FloorNumber > callElement Number AND Elevator Movement = callElement Direction = down
+                OR ElevatorFloorNumber < callButton Number AND ElevatorMovement = callElement Direction = up
+                IF magnitude of (Elevator FloorNumber - callButton Number) > magnitude of (Elevator FloorNumber - Elevator DestinationFloor)
+                    'if closest elevator's destination is closer than this call'
+                    THEN SET Elevator DestinationFloor to callElement Number
+                ENDIF
+            
+            CASE Elevator movement is false
+                    SET Elevator DestinationFloor to callElement Number
+                    call moveElevator WITH Elevator
+                        
+            CASE Elevator FloorNumber > callElement Number AND Elevator Movement IS up 
+                OR Elevator FloorNumber < callElement Number AND Elevator Movement IS down
+                go to next Elevator
                     
-                        call moveElevator on closestElevator
-                    
-                    if closestElevator's floorNumber > callButton number and closestElevator' movement is up 
-                        OR closestElevator's floorNumber < callButton number and closestElevator' movement is down
-                        then Set closestElevator to otherElevator
-
-
-            call usersDestination
-
-            set calls array to null            
+            ENDCASE
+        ENDFOR
 
 
 
+        CALL usersDestination WITH column
+
+               
+
+ENDSEQUENCE
 
 
-EndSequence
-
-CALL CallElevatorCheck
+WHEN a Callbutton is pressed
+    CALL CallElevatorCheck WITH COLUMN
 
