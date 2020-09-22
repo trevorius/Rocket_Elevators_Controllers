@@ -1,0 +1,112 @@
+SET Column to contain
+    callButtons 1 to 10  and up and down as an array
+    ElevatorA
+    ElevatorB
+
+
+SET ElevatorA and ElevatorB to contain
+    floorNumber
+    movement can be : up, down, false
+    floorRequestButtons 1 to 10 as an array
+    doors
+    destinationFloor
+
+Set doors to conatain
+    open
+    openTime
+    safeToClose
+  
+Sequence findClosestElevator
+    SET distanceA to difference between elevatorA's floor and calledTo
+    SET distanceB to difference between elevatorB's floor and calledTo
+    IF magnitude of distanceA > magnitude of distanceB 
+        Then Set closestElevator to elevatorB and otherElevator to elevatorA
+        ELSE SET closestElevator to elevatorA and otherElevator to elevatorB
+EndSequence
+
+
+Sequence DoorsAction
+    SET doors' open to true
+    wait openTime
+    set safeToClose to false
+    while safeToClose is false
+        call checkSafeToClose
+            if safeToClose is true
+                then close doors
+                set doors' open to false
+    
+EndSequence
+
+Sequence checkSafeToClose
+    If noone is blocking the Doors
+        Set safeToClose to true
+EndSequence
+
+Sequence moveElevator
+    
+    while elevator's floorNumber NOT destinationFloor
+        if elevator's destinationFloor > elevator's floorNumber
+            then set elevator's movement to up
+            else set elevator's movement to down
+
+        if  new floor callButton is pressed AND mouvement is same as callbutton
+            then call DoorsAction
+        
+        if elevator's movement is up 
+            then increment elevator's floorNumber by +1
+        else increment elevator's floorNumber by -1
+
+    if elevator's floorNumber is destinationFloor
+        then Set elevator's movement to false
+            call DoorsAction
+            set callButtonNumber of destinationFloor to notPressed
+EndSequence
+
+Sequence usersDestination
+    For every  element in floorRequestButtons 
+        if floorRequestButton is pressed
+            Set destinationFloor to floorRequestButton number
+            call moveElevator
+endSequence
+    
+
+Sequence CallElevatorCheck 
+    set counter to 1
+    While counter <= callButton array length
+        If callButton number (counter) is pressed
+            then add callbutton number to calls array
+            
+        ELSE if counter < callButton array Length
+                then increment counter by +1
+            else
+            Set counter to 0
+
+            For every element in calls array
+
+                while callbuttonNumber equal to calls array element is pressed
+
+                    call defineElevatorMovement
+                    call findClosestElevator
+
+                    if closestElevator movement is false
+                        then set closestElevator's destinationFloor  to callButton number
+                    
+                        call moveElevator on closestElevator
+                    
+                    if closestElevator's floorNumber > callButton number and closestElevator' movement is up 
+                        OR closestElevator's floorNumber < callButton number and closestElevator' movement is down
+                        then Set closestElevator to otherElevator
+
+
+            call usersDestination
+
+            set calls array to null            
+
+
+
+
+
+EndSequence
+
+CALL CallElevatorCheck
+

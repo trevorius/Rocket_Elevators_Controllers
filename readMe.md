@@ -2,4 +2,27 @@ this is the first week of Odysey program
 
 the exercise consists of writing the algorythms to controle 2 elevator situations: one residential and one corporate (which will be derived more than likeley from the first example).
 
-thes algorythms are to be written in Pseudocode according to codeboxx standards in 2 files , one for each situation.
+these algorythms are to be written in Pseudocode according to codeboxx standards in 2 files , one for each situation.
+a video presenting the project is also to be made 2-5 minutes
+
+FIRST SCENARIO
+
+Residential building:
+-10 floors
+the algorythm must be implemented for : - 1 column
+                                        - 2 elevator cages
+                                        - call buttons
+                                        - elevator doors
+                                        - floor request buttons
+                                    
+SECOND SCENARIO
+
+Corporate building:
+-66 Floors ( 6 basements included)
+the algorythm controlls :   - 1 battery
+                            - 4 collumns
+                            - 3 elevators per collumn (12 total)
+                            - call buttons
+                            - Doors
+                            - Floor request buttons
+                            - Floor display
