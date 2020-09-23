@@ -67,10 +67,10 @@ SET BUILDING to INSTANTIATE BuildingSpecs WITH 10 AND 1 AND 2
 SET COLUMN to INSTANTIATE Column WITH BUILDING Floors AND BUILDING Elevators
 
 
-set requests to empty list
+SET requests to empty list
 'sort sequence EDX week 3'
 'compare values array'
-set calls to empty list
+SET calls to empty list
 
 
 ENDSEQUENCE
@@ -179,7 +179,6 @@ SEQUENCE pressButton USING buttons
 ENDSEQUENCE
     
             
-
 SEQUENCE CallElevatorCheck USING column
     
     CALL pressButton WITH column CallButtons     
@@ -191,32 +190,39 @@ SEQUENCE CallElevatorCheck USING column
 
     FOR every callElement of calls 
 
-        CALL findClosestElevator WITH callElement AND column
-        
-        FOR every Elevator in column Elevators
-
-            CASE Elevator FloorNumber > callElement Number AND Elevator Movement = callElement Direction = down
+        FOR every elevator in collumn Elevators
+            IF Elevator FloorNumber > callElement Number AND Elevator Movement = callElement Direction = down
                 OR ElevatorFloorNumber < callButton Number AND ElevatorMovement = callElement Direction = up
-                IF magnitude of (Elevator FloorNumber - callButton Number) > magnitude of (Elevator FloorNumber - Elevator DestinationFloor)
-                    'if closest elevator's destination is closer than this call'
-                    THEN SET Elevator DestinationFloor to callElement Number
-                ENDIF
-            
-            CASE Elevator movement is false
-                    SET Elevator DestinationFloor to callElement Number
-                    call moveElevator WITH Elevator
-                        
-            CASE Elevator FloorNumber > callElement Number AND Elevator Movement IS up 
-                OR Elevator FloorNumber < callElement Number AND Elevator Movement IS down
-                go to next Elevator
+                AND magnitude of (Elevator FloorNumber - callButton Number) < magnitude of (Elevator FloorNumber - Elevator DestinationFloor)
+                    'if an elevator's travel takes it through callbutton's floor'
+                    THEN go to next callElement 'elevators movesequence will make it stop at the called floor'
+            ELSE
+
+                CALL findClosestElevator WITH callElement AND column
+                
+                FOR every Elevator in column Elevators
+
+                    CASE Elevator FloorNumber > callElement Number AND Elevator Movement = callElement Direction = down
+                        OR ElevatorFloorNumber < callButton Number AND ElevatorMovement = callElement Direction = up
+                        IF magnitude of (Elevator FloorNumber - callButton Number) > magnitude of (Elevator FloorNumber - Elevator DestinationFloor)
+                            'if closest elevator's destination is closer than this call'
+                            THEN SET Elevator DestinationFloor to callElement Number
+                        ENDIF
                     
-            ENDCASE
-        ENDFOR
-
-
-
-
-        CALL usersDestination WITH column
+                    CASE Elevator movement is false
+                            SET Elevator DestinationFloor to callElement Number
+                            call moveElevator WITH Elevator
+                                
+                    CASE Elevator FloorNumber > callElement Number AND Elevator Movement IS up 
+                        OR Elevator FloorNumber < callElement Number AND Elevator Movement IS down
+                        go to next Elevator
+                            
+                    ENDCASE
+                ENDFOR
+            ENDIF
+        ENDFOR        
+    ENDFOR
+    CALL usersDestination WITH column
 
                
 
