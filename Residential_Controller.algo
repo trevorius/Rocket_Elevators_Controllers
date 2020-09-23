@@ -125,12 +125,18 @@ SEQUENCE moveElevator USING Column Elevator
                     SET FloorRequestButton (WITH Number = Column Elevator floorNumber) IsPressed to false
                     REMOVE element with number = Column Elevator FloorNumber FROM requests AND calls
         ENDIF
+    CASE calls IS NOT empty
+        SET Column Elevator DestinationFloor to first callElement Number
+    CASE requests IS NOT empty
+        SET Column Elevator DestinationFloor to first request
+    ENDCASE
     ENDWHILE
         
     IF elevator FloorNumber = destinationFloor
         THEN SET elevator Movement to false
             CALL DoorsAction USING Column elevator
             SET callButtons WITH Number = destinationFloor IsPressed to false
+    
     ENDIF
     SET elevator destinationFloor to null
 ENDSEQUENCE
@@ -209,6 +215,7 @@ SEQUENCE CallElevatorCheck USING column
 
 
 
+
         CALL usersDestination WITH column
 
                
@@ -219,3 +226,5 @@ ENDSEQUENCE
 WHEN a Callbutton is pressed
     CALL CallElevatorCheck WITH COLUMN
 
+WHEN a FloorRequestButton is pressed
+    CALL usersDestination With COLUMN
