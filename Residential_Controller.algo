@@ -1,3 +1,7 @@
+SET BUILDING to INSTANTIATE BuildingSpecs WITH 10 AND 1 AND 2
+SET COLUMN to INSTANTIATE Column WITH BUILDING Floors AND BUILDING Elevators
+
+
 DEFINE BuildingSpecs USING floors AND collumns AND elevators
     Floors : floors
     Collumns : collumns
@@ -63,14 +67,20 @@ DEFINE Doors
     PassengerDetector : false
 ENDDEFINE
 
-SET BUILDING to INSTANTIATE BuildingSpecs WITH 10 AND 1 AND 2
-SET COLUMN to INSTANTIATE Column WITH BUILDING Floors AND BUILDING Elevators
-
-
+SET calls to empty list
 SET requests to empty list
+
+
 'sort sequence EDX week 3'
 'compare values array'
-SET calls to empty list
+'magnitude is the unsigned value of a variable'
+
+
+WHEN a Callbutton is pressed
+    CALL CallElevatorCheck WITH COLUMN
+
+WHEN a FloorRequestButton is pressed
+    CALL usersDestination With COLUMN
 
 
 ENDSEQUENCE
@@ -229,8 +239,4 @@ SEQUENCE CallElevatorCheck USING column
 ENDSEQUENCE
 
 
-WHEN a Callbutton is pressed
-    CALL CallElevatorCheck WITH COLUMN
 
-WHEN a FloorRequestButton is pressed
-    CALL usersDestination With COLUMN
