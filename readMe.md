@@ -26,3 +26,22 @@ the algorythm controlls :   - 1 battery
                             - Doors
                             - Floor request buttons
                             - Floor display
+
+ADDITIONAL REQUIREMENTS : 
+
+    Logic of priritization of elevators
+            
+            - elevators will be called  first if moving towards the call
+                                        second if stationary
+                                        third if closer to their destination    
+    Logic back to origin
+            - positions for idle lifts
+    
+    Security Logic status online/offline to be added and circomstances to be used
+
+    Temporal logic
+            - use building schedual to strategically position elevators
+            - measure waiting times for calls
+    Loading Logic
+            - detect if full (link to security)
+            -use with waiting time to get waiting time closer to average waiting time. 
