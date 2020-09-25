@@ -1,6 +1,96 @@
-' ADDITIONAL REQUIREMENTS, SORTING ALGORITHM'
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CLIENTs BUILDING
 
-SET Battery to INSTANTIATE Battery WITH 66 AND 6 AND 3 AND 1 AND 1
+    SET Battery to INSTANTIATE Battery WITH 66 AND 6 AND 3 AND 1 AND 1
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TEST SECTION
+    SET testBattery to INSTANTIATE Battery WITH 66 AND 6 AND 5 AND 1 AND 1
+    SET selectedElevator to null
+    
+    'Floors deserved:
+        'Column A: B6 to B1 + RC 
+        'Column B: 2 to 20 + RC 
+        'Column C: 21 to 40 + RC
+        'Column D: 41 to 60 + RC
+
+    'Scenario 1:
+        'Elevator B1 at 20th floor going to the 5th floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 1 of Column WITH ID : 2  TO 20 AND down AND 5
+        'Elevator B2 at 3rd floor going to the 15th floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 2 of Column WITH ID : 2  TO 3 AND up AND 15
+        'Elevator B3 at 13th floor going to RC
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 3 of Column WITH ID : 2  TO 13 AND down AND 1
+        'Elevator B4 at 15th floor going to the 2nd floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 4 of Column WITH ID : 2  TO 15 AND down AND 2
+        'Elevator B5 at 6th floor going to RC
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 5 of Column WITH ID : 2  TO 6 AND down AND 1
+
+        'Someone at RC wants to go to the 20th floor.
+        CALL pressButton WITH FloorRequestButton WITH NUMBER : 20 of FloorRequestButtonList of testBattery 
+        CALL ModUsersRequest WITH FloorRequestButton WITH NUMBER : 20 of FloorRequestButtonList of testBattery  AND testBattery
+        'Elevator B5 is expected to be sent.
+        DISPLAY selectedElevator
+
+    'Scénario 2:
+        'Elevator C1 at RC going to the 21st floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 1 of Column WITH ID : 3  TO 1 AND up AND 21
+        'Elevator C2 at 23rd floor going to the 28th floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 2 of Column WITH ID : 3  TO 23 AND up AND 28
+        'Elevator C3 at 33rd floor going to RC
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 3 of Column WITH ID : 3  TO 33 AND down AND 1
+        'Elevator C4 at 40th floor going to the 24th floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 4 of Column WITH ID : 3  TO 40 AND down AND 24
+        'Elevator C5 at 39th floor going to RC
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 5 of Column WITH ID : 3  TO 39 AND down AND 1
+
+        'Someone at RC wants to go to the 36th floor.
+        CALL pressButton WITH FloorRequestButton WITH NUMBER : 36 of FloorRequestButtonList of testBattery 
+        CALL ModUsersRequest WITH FloorRequestButton WITH NUMBER : 36 of FloorRequestButtonList of testBattery  AND testBattery
+        'Elevator C1 is expected to be sent.
+        DISPLAY selectedElevator
+
+    'Scénario 3:
+        'Elevator D1 at 58th going to RC
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 1 of Column WITH ID : 4  TO 58 AND down AND 1
+        'Elevator D2 at 50th floor going to the 60th floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 2 of Column WITH ID : 4  TO 50 AND up AND 60
+        'Elevator D3 at 46th floor going to the 58th floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 3 of Column WITH ID : 4  TO 46 AND up AND 58
+        'Elevator D4 at RC going to the 54th floor
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 4 of Column WITH ID : 4  TO 1 AND up AND 54
+        'Elevator D5 at 60th floor going to RC
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 5 of Column WITH ID : 4  TO 60 AND down AND 1
+
+        'Someone at 54e floor wants to go to RC.
+        CALL pressButton WITH  CallButton WITH Number : 54 of CallButtonList of Collumn WITH ID : 4 of testBattery
+        CALL ModCallElevator WITH Collumn WITH ID : 4 of testBattery
+        'Elevator D1 is expected to be sent.
+        DISPLAY selectedElevator
+
+    'Scénario 4:
+        'Elevator A1 “Idle” at SS4
+        SET FloorNumber AND Movement OF Elevator  with ID : 1 of Column WITH ID : 1  TO -4 AND false 
+        'Elevator A2 “Idle” at RC
+        SET FloorNumber AND Movement  OF Elevator  with ID : 2 of Column WITH ID : 1  TO 1 AND false
+        'Elevator A3 at SS3 going to SS5
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 3 of Column WITH ID : 1  TO -3 AND down AND -5
+        'Elevator A4 at SS6 going to RC
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 4 of Column WITH ID : 1  TO -6 AND up AND 1
+        'Elevator A5 at SS1 going to SS6
+        SET FloorNumber AND Movement  AND DestinationFloor OF Elevator  with ID : 5 of Column WITH ID : 1  TO -1 AND down AND -6
+
+        'Someone at SS3 wants to go to RC'.
+        CALL pressButton WITH  CallButton WITH Number : -3 of CallButtonList of Collumn WITH ID : 1 of testBattery
+        CALL ModCallElevator WITH Collumn WITH ID : 1 of testBattery
+        'Elevator A4 is expected to be sent.
+        DISPLAY selectedElevator
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND RCnumber
     Stories : floors
@@ -20,10 +110,10 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
     
     
     SEQUENCE create_BCollumns USING NumberOfBasementCollumns AND ElevatorsPerCollumn AND Basements  AND FloorsPerCollumn
-        SET CollumnCounter to 0
+        SET CollumnCounter to 1
         WHILE CollumnCounter LESS THAN NumberOfBasementCollumns 
 
-             IF Basements LESS THAN FloorsPerCollumn
+             IF Basements LESS THAN FloorsPerCollumn +1
                 Then SET basementsServed to a list of numbers from -1 to NEGATIVE Basements
                     ADD Base to basementsServed
             ELSE    SET basementsServed to a list of numbers from  NEGATIVE CollumnCounter MULTIPLIES FloorsPerCollumn to NEGATIVE (CollumnCounter PLUS 1) MULTIPLIES FloorsPerCollumn
@@ -38,10 +128,10 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
     ENDSEQUENCE
 
     SEQUENCE create_Collumns USING NumberOfCollumns AND ElevatorsPerCollumn AND Floors And FloorsPerCollumn AND Base
-        SET CollumnCounter to 0
+        SET CollumnCounter to 1
         WHILE CollumnCounter LESS THAN collumnlist length
 
-            IF Floors LESS THAN FloorsPerCollumn
+            IF Floors LESS THAN FloorsPerCollumn +1
                 Then SET floorsServed to a list of numbers from 1 to Floors
                     ADD Base to floorsServed
             ELSE    SET floorsServed to a list of numbers from CollumnCounter MULTIPLIES FloorsPerCollumn to (CollumnCounter PLUS 1) MULTIPLIES FloorsPerCollumn 
@@ -78,14 +168,14 @@ DEFINE interfaceDisplay USING floors
 
 ENDDEFINE
 
-DEFINE Collumn USING id AND floors AND elevators
+DEFINE Collumn USING id AND floorList AND elevators
     ID: id
     CallButtonList : SET to empty list
     ElevatorList : SET to empty list
     CallList : SET to empty list
-    ServedFloors : floors
+    ServedFloorList : floorList
     numberOfElevators: elevators
-    floors : ServedFloors length
+    floors : ServedFloorList length
     Online : true
     Online_elevatorlist : SET to empty list
 
@@ -102,8 +192,8 @@ DEFINE Collumn USING id AND floors AND elevators
         ELSE SET toBase to down
         ENDIF
 
-        SET counter to 0
-        WHILE counter LESS THAN elevators
+        SET counter to 1
+        WHILE counter LESS THAN elevators +1
             SET Elevator to INSTANTIATE Elevator WITH counter AND O AND floors AND toBase
             ADD ELevator to ElevatorList
         ENDWHILE
@@ -127,7 +217,7 @@ DEFINE Elevator USING id AND Location AND floors AND toBase
     ID: id
     FloorNumber : location
     Movement : SET to false 'can be : up, down, or false'
-    ToBase : toBase
+    ToBase : toBase 'can be up or down'
     DestinationFloor : null
     Distance : null
     Doors: SET to Object
@@ -186,25 +276,29 @@ SEQUENCE magnitude USING number
     ENDIF
 ENDSEQUENCE
 
-WHEN a  CallButton of CallButtonList of Collumn is pressed
-    CALL pressButton WITH  CallButton of CallButtonList of Collumn
-    CALL ModCallElevator WITH Collumn
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+EVENT LISTENERS
 
-WHEN a FloorRequestButton of FloorRequestButtonList of Battery is pressed
-    CALL pressButton WITH FloorRequestButton of FloorRequestButtonList of Battery 
-    CALL ModUsersRequest WITH FloorRequestButton of FloorRequestButtonList of Battery  AND Battery
+    WHEN a  CallButton of CallButtonList of Collumn is pressed
+        CALL pressButton WITH  CallButton of CallButtonList of Collumn
+        CALL ModCallElevator WITH Collumn
+
+    WHEN a FloorRequestButton of FloorRequestButtonList of Battery is pressed
+        CALL pressButton WITH FloorRequestButton of FloorRequestButtonList of Battery 
+        CALL ModUsersRequest WITH FloorRequestButton of FloorRequestButtonList of Battery  AND Battery
 
 
-WHEN 1 second passes
-    CALL timerAdd WITH Battery
+    WHEN 1 second passes
+        CALL timerAdd WITH Battery
 
-WHEN 'elevator is IDLE for 5 mins'
-    a movement of Elevator of collumn   IS false AND  timer of Elevator of collumn  is 300 
-    CALL goToIdle WITH collumn and Battery
+    WHEN 'elevator is IDLE for 5 mins'
+        a movement of Elevator of collumn   IS false AND  timer of Elevator of collumn  is 300 
+        CALL goToIdle WITH collumn and Battery
 
-WHEN  ALARM of Battery IS CHANGED
-    CALL alarm WITH COLLUMN AND Battery
+    WHEN  ALARM of Battery IS CHANGED
+        CALL alarm WITH COLLUMN AND Battery
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 SEQUENCE ModCallElevator USING Collumn
@@ -418,8 +512,8 @@ SEQUENCE selectCollumn USING Battery AND button
     FOR every Collumn of collumnList of Battery
 
 
-        CALL (IS_IN WITH button number AND Collumn ServedFloors)RETURNING buttonNumber_IS_IN_servedFloors
-        IF  buttonNumber_IS_IN_servedFloors
+        CALL (IS_IN WITH button number AND Collumn ServedFloorList)RETURNING buttonNumber_IS_IN_ServedFloorList
+        IF  buttonNumber_IS_IN_ServedFloorList
             THEN SET selectedCollumn to Collumn of collumnList of Battery
     ENDFOR
 

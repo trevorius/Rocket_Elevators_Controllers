@@ -19,7 +19,7 @@ SECOND SCENARIO
 
 Corporate building:
 -66 Floors ( 6 basements included)
-the algorythm controlls :   - 1 battery
+the algorithm controlls :   - 1 battery
                             - 4 collumns
                             - 3 elevators per collumn (12 total)
                             - call buttons
@@ -29,15 +29,15 @@ the algorythm controlls :   - 1 battery
 
 ADDITIONAL REQUIREMENTS : 
 
-    //Logic of priritization of elevators
+    //Logic of prioritization of elevators
             
             - elevators will be called  first if moving towards the call
                                         second if stationary
                                         third if closer to their destination    
     //Logic back to origin
-            - positions for idle lifts
+            - positions for idle lifts evenly spread out 
     
-    Security Logic status online/offline to be added and circomstances to be used
+    //Security Logic status online/offline to be added and circomstances to be used
 
     Temporal logic
             - use building schedual to strategically position elevators

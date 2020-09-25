@@ -1,6 +1,79 @@
 SET BUILDING to INSTANTIATE BuildingSpecs WITH 10 AND 1 AND 2
 SET COLLUMN to INSTANTIATE Collumn WITH BUILDING Floors AND BUILDING Elevators
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TEST SECTION
 
+    SET SelectedElevator to null
+
+    Scenario 1:
+        'Elevator A is Idle at floor 2'
+        SET floorNumber AND Movement  of elevator WITH ID:1 TO 2 AND false
+        'Elevator B is Idle at floor 6'
+        SET floorNumber AND Movement of elevator WITH ID:2 TO 6 AND false
+        'Someone is on floor 3 and wants to go to the 7th floor. '
+        SET IsPressed  of callButtonUP WITH number: 3 to true
+        CALL CallElevatorCheck WITH COLLUMN
+        SET IsPressed of FloorRequestButton With Number : 7 to true
+        CALL usersDestination WITH COLLUMN
+        'Elevator A is expected to be sent.
+        DISPLAY SelectedElevator
+
+
+    Scenario 2:
+        'Elevator A is Idle at floor 10 
+        SET floorNumber AND Movement of elevator WITH ID:2 TO 10 AND false
+        'Elevator B is idle at floor 3
+        SET floorNumber AND Movement of elevator WITH ID:2 TO 3 AND false
+        'Someone is on the 1st floor and requests the 6th floor. 
+        SET IsPressed  of callButtonUP WITH number: 1 to true
+        CALL CallElevatorCheck WITH COLLUMN
+        SET IsPressed of FloorRequestButton With Number : 6 to true
+        CALL usersDestination WITH COLLUMN
+        'Elevator B should be sent. 
+        DISPLAY SelectedElevator
+
+
+        '2 minutes later, someone else is on the 3rd floor and requests the 5th floor. 
+        SET IsPressed  of callButtonUP WITH number: 3 to true
+        CALL CallElevatorCheck WITH COLLUMN
+        SET IsPressed of FloorRequestButton With Number : 5 to true
+        CALL usersDestination WITH COLLUMN
+        'Elevator B should be sent.
+        DISPLAY SelectedElevator
+
+
+        'Finally, a third person is at floor 9 and wants to go down to the 2nd floor. 
+        SET IsPressed  of callButtonUP WITH number: 9 to true
+        CALL CallElevatorCheck WITH COLLUMN
+        SET IsPressed of FloorRequestButton With Number : 2 to true
+        CALL usersDestination WITH COLLUMN
+
+        'Elevator A should be sent.
+        DISPLAY SelectedElevator
+
+    Scenario 3:
+        'Elevator A is Idle at floor 10 
+        SET floorNumber AND Movement  of elevator WITH ID:1 TO 10 AND false
+        'Elevator B is Moving from floor 3 to floor 6
+        SET floorNumber AND Movement AND DestinationFloor of elevator WITH ID:1 TO 3 AND up AND 6
+        'Someone is on floor 3 and requests the 2nd floor. 
+        SET IsPressed  of callButtonUP WITH number: 3 to true
+        CALL CallElevatorCheck WITH COLLUMN
+        SET IsPressed of FloorRequestButton With Number : 2 to true
+        CALL usersDestination WITH COLLUMN
+        'Elevator A should be sent. 
+        DISPLAY SelectedElevator
+
+        '5 minutes later, someone else is on the 10th floor and wants to go to the 3rd. 
+        SET IsPressed  of callButtonUP WITH number: 10 to true
+        CALL CallElevatorCheck WITH COLLUMN
+        SET IsPressed of FloorRequestButton With Number : 3 to true
+        CALL usersDestination WITH COLLUMN
+
+        'Elevator B should be sent.
+        DISPLAY SelectedElevator
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DEFINE BuildingSpecs USING floors AND collumns AND elevators
     Floors : floors
@@ -27,8 +100,11 @@ DEFINE Collumn USING floors AND elevators
         ENDWHILE
     ENDSEQUENCE
     SEQUENCE create_elevators USING elevators
-        FOR every elevator
-            SET Elevator to INSTANTIATE Elevator WITH elevator AND O AND floors 
+        
+        SET counter to 1
+        WHILE counter LESSTHAN OR EQUALTO elevators
+            SET Elevator to INSTANTIATE Elevator WITH ecounter AND O AND floors 
+            increment counter by +1
         ENDFOR
     ENDSEQUENCE
 
@@ -88,6 +164,8 @@ ENDDEFINE
 SET calls to empty list
 SET requests to empty list
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 'sort SEQUENCE EDX week 3'
 'compare values array'
@@ -109,22 +187,27 @@ SEQUENCE magnitude USING number
     ENDIF
 ENDSEQUENCE
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ EVENT LISTENERS
+ 
+        WHEN a Callbutton IS pressed
+            CALL CallElevatorCheck WITH COLLUMN
 
-WHEN BUILDING ALARM IS CHANGED
-    CALL alarm WITH COLLUMN AND BUILDING
+        WHEN a FloorRequestButton IS pressed
+            CALL usersDestination WITH COLLUMN
 
-WHEN a Callbutton IS pressed
-    CALL CallElevatorCheck WITH COLLUMN
+        WHEN 1 second passes
+            CALL timerAdd WITH BUILDING
 
-WHEN a FloorRequestButton IS pressed
-    CALL usersDestination WITH COLLUMN
+        WHEN 'elevator is IDLE for 5 mins'
+            a  Movement of Elevator of collumn IS false AND timer of Elevator of collumn  is 300 
+            CALL goToIdle WITH collumn
 
-WHEN 1 second passes
-    CALL timerAdd WITH BUILDING
+        WHEN BUILDING ALARM IS CHANGED
+            CALL alarm WITH COLLUMN AND BUILDING
 
-WHEN 'elevator is IDLE for 5 mins'
-    a  movement of Elevator of collumn IS false AND timer of Elevator of collumn  is 300 
-    CALL goToIdle WITH collumn
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 SEQUENCE CallElevatorCheck USING collumn
@@ -133,7 +216,7 @@ SEQUENCE CallElevatorCheck USING collumn
     
     CALL pressButton WITH CallButtons of collumn  
     FOR every CallButton of CallButtons of collumn
-        IF CallButton isPressed SAME AS true 
+        IF CallButton IsPressed SAME AS true 
             THEN ADD callButton to calls 
         ENDIF
     ENDFOR
@@ -151,7 +234,8 @@ SEQUENCE CallElevatorCheck USING collumn
                 magnitude_OF_FloorNumber GREATER THAN magitude_OF_buttonNumber AND Elevator Movement SAME_AS button Direction SAME AS down
                 OR maagnitude_OF_FloorNumber GREATER THAN magitude_OF_buttonNumber  AND ElevatorMovement SAME AS button Direction SAME AS up
                 AND distanceToCall SMALLER THAN distanceToDestination
-                    THEN go to next callElement 'elevators moveSEQUENCE will make it stop at the called floor'
+                    THEN SET SelectedElevator to elevator of Online_elevators of collumn                    
+                        go to next callElement 'elevators moveSEQUENCE will make it stop at the called floor'
             ELSE
 
                 CALL findClosestElevator WITH callElement AND collumn
@@ -168,11 +252,13 @@ SEQUENCE CallElevatorCheck USING collumn
                             distanceToCall GREATER THAN distanceToDestination
                             
                             THEN SET DestinationFloor of Elevator to Number of callElement
+                                SET SelectedElevator to elevator of Online_elevators of collumn
                         ENDIF
                     
-                    CASE Elevator movement is false
+                    CASE Elevator Movement is false
                             SET DestinationFloor of Elevator to Number of callElement 
                             call moveElevator WITH Elevator
+                            SET SelectedElevator to elevator of Online_elevators of collumn
                                 
                     CASE FloorNumber OF Elevator GREATER THAN Number of callElement  AND Movement of Elevator  IS up 
                         OR FloorNumber of Elevator SMALLER THAN Number ofcallElement  AND Movement of Elevator  IS down
@@ -236,7 +322,7 @@ ENDSEQUENCE
 SEQUENCE pressButton USING buttons 
     FOR every button  of buttons
         IF button is pressed
-            SET  IsPressed of button to true
+            SET  IsPressed  of button to true
         ENDIF 
     ENDFOR
 ENDSEQUENCE
@@ -260,8 +346,8 @@ SEQUENCE moveElevator USING Elevator of Collumn
             OR FloorNumber_IS_IN_requests 
                 THEN 
                     CALL DoorsAction USING Elevator of Collumn 
-                    SET callButtons (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
-                    SET FloorRequestButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
+                    SET callButtons (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed  to false
+                    SET FloorRequestButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed  to false
                     REMOVE element WITH number SAME AS FloorNumber of Elevator of Collumn FROM requests AND calls
         ENDIF
     CASE calls IS NOT empty
@@ -275,7 +361,7 @@ SEQUENCE moveElevator USING Elevator of Collumn
         THEN SET elevator Movement to false
             CALL StartTimer WITH elevator
             CALL DoorsAction WITH Elevator of Collumn 
-            SET callButtons WITH Number SAME AS destinationFloor IsPressed to false
+            SET callButtons WITH Number SAME AS destinationFloor IsPressed  to false
     
     ENDIF
     SET destinationFloor of elevator  to null
@@ -317,7 +403,7 @@ ENDSEQUENCE
 SEQUENCE goToIdle USING collumn
     SET counter to 0
     FOR every elevator of collumn 
-        IF movement IS false
+        IF Movement IS false
             THEN   
                 INCREMENT counter by +1
         ENDIF
@@ -326,7 +412,7 @@ SEQUENCE goToIdle USING collumn
     SET idleFloor to (floors DIVIDED BY (counter PLUS 1) ROUNDED DOWN)
     SET counter to 1
     FOR every elevator of collumn 
-        IF movement IS false
+        IF Movement IS false
             THEN
                 SET  destinationFloor of elevator of collumn to (idleFloor MULTIPLIES counter)  
                 INCREMENT counter by +1
