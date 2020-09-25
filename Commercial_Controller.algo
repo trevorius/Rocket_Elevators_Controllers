@@ -9,17 +9,17 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
     Base : baseFloorNumber
     RC : RCnumber 
     NumberOfCollumns:roundUp ( (floors MINUS basements) DIVIDED BY FloorsPerCollumn )
-
+    ALARM : false
 
     NumberOfBasementCollumns : roundUp ( basements DIVIDED BY FloorsPerCollumn )
-    Collumns : SET to empty list
+    CollumnList : SET to empty list
     FLoorsPerCollumn : 20
-    ElevatorsPerColumn : elevators
-    FloorRequestButtons: SET to empty list
+    ElevatorsPerCollumn : elevators
+    FloorRequestButtonList: SET to empty list
     interfaceDisplay : SET to INSTANTIATE interfaceDisplay USING floors
     
     
-    SEQUENCE create_BColumns Using NumberOfBasementCollumns AND ElevatorsPerColumn AND Basements  AND FloorsPerCollumn
+    SEQUENCE create_BCollumns USING NumberOfBasementCollumns AND ElevatorsPerCollumn AND Basements  AND FloorsPerCollumn
         SET CollumnCounter to 0
         WHILE CollumnCounter LESS THAN NumberOfBasementCollumns 
 
@@ -31,15 +31,15 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
                     ADD Base to basementsServed
             ENDIF
 
-            SET Column to INSTANTIATE Column WITH CollumnCounter AND BasementsServed AND ElevatorsPerColumn 
-            ADD Column to Columns
+            SET Collumn to INSTANTIATE Collumn WITH CollumnCounter AND BasementsServed AND ElevatorsPerCollumn 
+            ADD Collumn to CollumnList
             INCREMENT CollumnCounter by +1
         ENDWHILE
     ENDSEQUENCE
 
-    SEQUENCE create_Columns Using NumberOfCollumns AND ElevatorsPerColumn AND Floors And FloorsPerCollumn AND Base
+    SEQUENCE create_Collumns USING NumberOfCollumns AND ElevatorsPerCollumn AND Floors And FloorsPerCollumn AND Base
         SET CollumnCounter to 0
-        WHILE CollumnCounter LESS THAN collumns
+        WHILE CollumnCounter LESS THAN collumnlist length
 
             IF Floors LESS THAN FloorsPerCollumn
                 Then SET floorsServed to a list of numbers from 1 to Floors
@@ -50,44 +50,53 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
             ENDIF
 
             SET CollumnID to NumberOfBasementCollumns + CollumnCounter 
-            SET Column to INSTANTIATE Column WITH CollumnID AND floorsServed AND ElevatorsPerColumn 
-            ADD Column to Columns
+            SET Collumn to INSTANTIATE Collumn WITH CollumnID AND floorsServed AND ElevatorsPerCollumn 
+            ADD Collumn to CollumnList
             INCREMENT CollumnCounter by +1
         ENDWHILE
     ENDSEQUENCE
 
-       SEQUENCE create_FloorRequestButtons USING Floors
+       SEQUENCE create_FloorRequestButtonList USING Floors
        SET counter to NEGATIVE basements
         WHILE counter LESS THAN Floors
             SET FloorRequestButton to INSTANTIATE FloorRequestButton WITH counter
-            ADD FloorRequestButton to FloorRequestButtons
+            ADD FloorRequestButton to FloorRequestButtonList
         ENDWHILE
     ENDSEQUENCE
     
+    CALL create_BCollumns WITH NumberOfBasementCollumns AND ElevatorsPerCollumn AND Basements  AND FloorsPerCollumn
+    CALL create_Collumns WITH NumberOfCollumns AND ElevatorsPerCollumn AND Floors And FloorsPerCollumn AND Base
+    CALL create_FloorRequestButtonList WITH Floors
+
+
 
 ENDDEFINE
 
-DEFINE interfaceDisplay using floors
+DEFINE interfaceDisplay USING floors
     GOTO: SET to null
     FloorServedBy: SET to list of floors elements       
 
 ENDDEFINE
 
-DEFINE Column USING id AND floors AND elevators
+DEFINE Collumn USING id AND floors AND elevators
     ID: id
-    CallButtons : SET to empty list
-    Elevators : SET to empty list
-    Calls : SET to empty list
+    CallButtonList : SET to empty list
+    ElevatorList : SET to empty list
+    CallList : SET to empty list
     ServedFloors : floors
+    numberOfElevators: elevators
+    floors : ServedFloors length
+    Online : true
+    Online_elevatorlist : SET to empty list
 
-    SEQUENCE create_callButtons USING floors
+    SEQUENCE create_CallButtonList USING floors
         FOR every floor
             SET callButton to INSTANTIATE callButton WITH floor 
-            ADD callButton to callButtons
+            ADD callButton to CallButtonList
            
         ENDFOR
     ENDSEQUENCE
-    SEQUENCE create_elevators USING elevators
+    SEQUENCE create_elevatorlist USING elevators
         IF first ServedFloor  LESS THAN 0
             THEN SET toBase to up
         ELSE SET toBase to down
@@ -96,8 +105,16 @@ DEFINE Column USING id AND floors AND elevators
         SET counter to 0
         WHILE counter LESS THAN elevators
             SET Elevator to INSTANTIATE Elevator WITH counter AND O AND floors AND toBase
-        ENDFOR
+            ADD ELevator to ElevatorList
+        ENDWHILE
     ENDSEQUENCE
+
+    CALL create_CallButtonList WITH floors
+    CALL create_elevatorlist WITH elevators
+
+
+
+
 ENDDEFINE      
 
 DEFINE CallButton USING floor 
@@ -115,15 +132,22 @@ DEFINE Elevator USING id AND Location AND floors AND toBase
     Distance : null
     Doors: SET to Object
     FloorDisplay : SET to Object
-    Requests: SET to empty list
+    RequestList: SET to empty list
+    Timer : 0
+    Online: true
+
  
     SEQUENCE create_Doors 
         SET doors to INSTANTIATE Doors
     ENDSEQUENCE
-    SEQUENCE create_FloorDisplay Using FloorNumber AND Movement
+    SEQUENCE create_FloorDisplay USING FloorNumber AND Movement
         Number : FloorNumber
         Direction : Movement 
     ENDSEQUENCE
+    
+    
+    CALL create_Doors 
+    CALL create_FloorDisplay WITH FloorNumber AND Movement
 
 ENDDEFINE
 
@@ -162,88 +186,119 @@ SEQUENCE magnitude USING number
     ENDIF
 ENDSEQUENCE
 
-WHEN a Collumn Callbutton is pressed
-    CALL pressButton WITH Collumn Callbutton
+WHEN a  CallButton of CallButtonList of Collumn is pressed
+    CALL pressButton WITH  CallButton of CallButtonList of Collumn
     CALL ModCallElevator WITH Collumn
 
-WHEN a FloorRequestButton is pressed
-    CALL pressButton WITH Battery FloorRequestButton
-    CALL ModUsersRequest WITH Battery FloorRequestButton AND Battery
+WHEN a FloorRequestButton of FloorRequestButtonList of Battery is pressed
+    CALL pressButton WITH FloorRequestButton of FloorRequestButtonList of Battery 
+    CALL ModUsersRequest WITH FloorRequestButton of FloorRequestButtonList of Battery  AND Battery
+
+
+WHEN 1 second passes
+    CALL timerAdd WITH Battery
+
+WHEN 'elevator is IDLE for 5 mins'
+    a movement of Elevator of collumn   IS false AND  timer of Elevator of collumn  is 300 
+    CALL goToIdle WITH collumn and Battery
+
+WHEN  ALARM of Battery IS CHANGED
+    CALL alarm WITH COLLUMN AND Battery
+
+
 
 SEQUENCE ModCallElevator USING Collumn
-    
-    ADD Collumn CallButton Number to Collumn Calls
 
-    IF CALL ( checkIfElevatorOnItsWay WITH Collumn AND Collumn CallButton Number) RETURNING true 
+    CALL checkIfElevatorOnline WITH collumn
+    
+    ADD  Number of CallButton of CallButtonList of Collumn to  CallList of Collumn
+
+    IF CALL ( checkIfElevatorOnItsWay WITH Collumn AND Number of CallButton of CallButtonList of Collumn) RETURNING true 
         THEN elevator stop included in moveelevator
     ELSE
-        CALL sortElevatorsByDistance USING Collumn CallButton Number AND Collumn
-        FOR every Collumn Elevator
-         SET selectedElevator to null
-            WHILE selectedElevator IS null
-                CASE Elevator movement is false
-                    THEN SET Elevator DestinationFloor to Collumn CallButton Number
-                    SET selectedElevator to Elevator
-                CASE Elevator FloorNumber GREATER THAN callElement Number AND Elevator Movement SAME AS callElement Direction SAME AS down
-                    OR ElevatorFloorNumber LESS THAN callButton Number AND ElevatorMovement SAME AS callElement Direction SAME AS up
-                    'elevator moving towards called floor'
-                    THEN SET Elevator DestinationFloor to Collumn CallButton Number
-                    SET selectedElevator to Elevator
-                ELSE 
-                    NEXT Collumn Elevator
-            ENDWHILE
+        CALL sortElevatorsByDistance USING  Number of CallButton of CallButtonList of Collumn AND Collumn
+        FOR every Elevator of collumn 
+            CALL (IS_IN WITH Elevator AND Online_elevatorlist of collumn)RETURNING elevator_IS_IN_Online_elevatorlist
+            IF elevator_IS_IN_Online_elevatorlist THEN
+                SET selectedElevator to null
+                WHILE selectedElevator IS null                    
+                    CASE Elevator movement is false 
+                        THEN SET Elevator DestinationFloor to  Number of CallButton of CallButtonList of Collumn
+                        SET selectedElevator to Elevator
+                    CASE FloorNumber of Elevator GREATER THAN callElement Number AND Elevator Movement SAME AS callElement Direction SAME AS down
+                        OR ElevatorFloorNumber LESS THAN callButton Number AND ElevatorMovement SAME AS callElement Direction SAME AS up
+                        'elevator moving towards called floor'
+                        THEN SET Elevator DestinationFloor to  Number of CallButton of CallButtonList of Collumn
+                        SET selectedElevator to Elevator
+                    ELSE 
+                        NEXT Elevator of collumn 
+                ENDWHILE
+            ENDIF
         ENDFOR
     CALL moveElevator WITH selectedElevator AND Collumn
     ENDIF
 ENDSEQUENCE
 
-SEQUENCE ModUsersRequest USING Battery FloorRequestButton AND Battery
+SEQUENCE ModUsersRequest USING FloorRequestButton of FloorRequestButtonList of Battery  AND Battery
+
+    CALL checkIfElevatorOnline WITH collumn
     
     SET selectedCollumn to null
-    CALL selectCollumn WITH Battery AND Battery FloorRequestButton
-    ADD Battery FloorRequestButton Number to Battery selectedCollumn Requests
-
-    CALL sortElevatorsByDistance WITH BaseFloorNumber AND Battery selectedCollumn
-    FOR every Collumn elevator
-        IF elevator Distance IS 0
-            THEN
-                SET selectedElevator to elevator
-        ENDIF
-    ENDFOR
-    IF selectedElevator IS null
-        THEN
+    CALL selectCollumn WITH Battery AND FloorRequestButton of FloorRequestButtonList of Battery 
+    IF selectedCollumn Online = false
+        THEN DISPLAY 'elevators to your floor are offline sorry for the inconvenience'
+            RETURN
+    ENDIF
+    
+    CALL sortElevatorsByDistance WITH BaseFloorNumber AND  selectedCollumn
+    
             
-            IF CALL ( checkIfElevatorOnItsWay WITH Battery selectedCollumn AND BaseFloorNumber) RETURNING true 
-                THEN    
-                    SET selectedElevator to OnItsWay
-                    
-            ELSE        
+        IF CALL ( checkIfElevatorOnItsWay WITH  selectedCollumn  AND BaseFloorNumber) RETURNING true
+            THEN    
+                SET selectedElevator to OnItsWay 'set in checkIfElevatorOnItsWay sequence'
+        ELSE        
+            FOR every Elevator of collumn 
+                CALL (IS_IN WITH Elevator AND Online_elevatorlist of collumn)RETURNING elevator_IS_IN_Online_elevatorlist
+                IF elevator_IS_IN_Online_elevatorlist THEN
 
-                
-                FOR every Battery selectedCollumn Elevator
-                    IF Elevator Movement is false
+                    IF distance of ELevator IS 0
                         THEN
-                            SET selectedElevator to Elevator
-                            SET Elevator DestinationFloor to BaseFloorNumber
-                            CALL moveElevator USING Elevator
+                        SET selectedElevator to elevator
                     ENDIF
-                ENDFOR
-                IF selectedElevator IS null
-                    THEN 
-                    SORT selectedCollumn Elevators to ascending floorNumber
-                    Set selectedElevator to last selectedCollumn Elevator
                 ENDIF
+            ENDFOR
+            IF selectedElevator IS null
+                THEN
+                        
+                    FOR every Elevator of selectedCollumn
+                        CALL (IS_IN WITH Elevator AND Online_elevatorlist of collumn)RETURNING elevator_IS_IN_Online_elevatorlist
+                        IF elevator_IS_IN_Online_elevatorlist THEN
+
+                            IF Movement of Elevator  is false
+                                THEN
+                                    SET selectedElevator to Elevator
+                                    SET DestinationFloor of Elevator  to BaseFloorNumber
+                                    CALL moveElevator USING Elevator
+                            ENDIF
+                        ENDIF
+                        
+                    ENDFOR
+                    IF selectedElevator IS null
+                        THEN 
+                            SORT Online_elevatorlist of  selectedCollumn to ascending floorNumber
+                            Set selectedElevator to last selectedCollumn ONLINE_Elevator
+                    ENDIF
             ENDIF
     ENDIF
                             
-    ADD Battery FloorRequestButton Number to selectedElevator Requests
-    SORT selectedElevator Requests to ascending unsigned values
+    ADD Number of FloorRequestButton of FloorRequestButtonList of Battery to RequestList of selectedElevator 
+    SORT RequestList of selectedElevator  to ascending (CALL magnitude WITH Requests of selectedElevator)
     SET selectedElevator DestinationFloor to last Request
     CALL moveElevator USING selectedElevator AND selectedCollumn
-    SET Battery interfaceDisplay GOTO to selectedElevator
-    ADD selectedColumn to Battery interfaceDisplay FloorServedBy (Battery FloorRequestButton Number)element
-    ADD selectedElevator to Battery interfaceDisplay FloorServedBy (Battery FloorRequestButton Number)element
-    CALL displayInterface WITH Battery interfaceDisplay
+    SET GOTO of interfaceDisplay of Battery  to selectedElevator
+    ADD selectedCollumn to FloorServedBy of  interfaceDisplay of Battery  (Number of FloorRequestButton of FloorRequestButtonList of Battery)element
+    ADD selectedElevator to  FloorServedBy of interfaceDisplay of Battery  ( Number of FloorRequestButton of FloorRequestButtonList of Battery )element
+    CALL displayInterface WITH interfaceDisplay of Battery 
 
 
 ENDSEQUENCE
@@ -255,12 +310,12 @@ ENDSEQUENCE
 
 SEQUENCE checkIfElevatorOnItsWay USING collumn AND button 
 
-    FOR every collumn elevator
+    FOR every elevator of collumn 
 
-            CAll (magnitude WITH Elevator FloorNumber) RETURNING magnitude_OF_FloorNumber
-            CALL (magnitude WITH button Number) RETURNING magitude_OF_buttonNumber
-            CALL (magnitude WITH (Elevator FloorNumber MINUS callButton Number)) RETURNING distanceToCall
-            CALL (magnitude WITH (Elevator FloorNumber MINUS Elevator DestinationFloor)) RETURNING distanceToDestination
+            CAll (magnitude WITH FloorNumber of Elevator) RETURNING magnitude_OF_FloorNumber
+            CALL (magnitude WITH  Number of callButton) RETURNING magitude_OF_buttonNumber
+            CALL (magnitude WITH (FloorNumber of Elevator MINUS  Number of callButton)) RETURNING distanceToCall
+            CALL (magnitude WITH (FloorNumber of Elevator MINUS DestinationFloor of Elevator )) RETURNING distanceToDestination
 
             IF  'if an elevator's travel takes it through button's floor'
                 magnitude_OF_FloorNumber GREATER THAN magitude_OF_buttonNumber AND Elevator Movement SAME_AS button Direction SAME AS down
@@ -274,20 +329,20 @@ SEQUENCE checkIfElevatorOnItsWay USING collumn AND button
     ENDFOR
 ENDSEQUENCE
 
-SEQUENCE sortElevatorsByDistance USING calledTo AND Column
+SEQUENCE sortElevatorsByDistance USING calledTo AND Collumn
     
-    FOR every  Column Elevator 
-        CALL (magnitude WITH (Elevator floorNumber MINUS calledTo)) RETURNING Elevator_distance 
-        SET Elevator Distance TO Elevator_distance 
+    FOR every  Elevator of Collumn
+        CALL (magnitude WITH (FloorNumber of Elevator MINUS calledTo)) RETURNING Elevator_distance 
+        SET Distance of ELevator TO Elevator_distance 
     ENDFOR
-    SORT Column Elevators by ascending distance
-    SET closestElevator to first elevator of Column Elevators
+    SORT Online_elevatorlist of collumn by ascending distance
+    SET closestElevator to first elevator of Online_elevatorlist of collumn
 ENDSEQUENCE
 
 SEQUENCE moveElevator USING elevator AND Collumn 
     
-    WHILE elevator FloorNumber  IS NOT elevator DestinationFloor
-        IF elevator DestinationFloor GREATER THAN elevator floorNumber
+    WHILE FloorNumber of elevator  IS NOT elevator DestinationFloor
+        IF elevator DestinationFloor GREATER THAN FloorNumber of Elevator
             THEN SET elevator Movement to up
             INCREMENT floorNumber of elevator by +1
             
@@ -296,31 +351,33 @@ SEQUENCE moveElevator USING elevator AND Collumn
             INCREMENT floorNumber of elevator by -1
         ENDIF
 
-        CALL (IS_IN WITH elevator FloorNumber AND Collumn Calls) RETURNING FloorNumber_IS_IN_CALLS
-        CALL (IS_IN WITH Column Elevator FloorNumber AND elevator requests) RETURNING FloorNumber_IS_IN_requests
+        CALL (IS_IN WITH FloorNumber of Elevator AND CallList of Collumn ) RETURNING FloorNumber_IS_IN_CALLLIST
+        CALL (IS_IN WITH FloorNumber of Elevator of Collumn AND requests of elevator ) RETURNING FloorNumber_IS_IN_requests
 
-        IF  loorNumber_IS_IN_CALLS AND Column Elevator Movement IS elevator ToBase
-            OR FloorNumber_IS_IN_requestsAND Column Elevator Movement ISNOT elevator ToBase 
+        IF 'elevator crosses a floor with a call or request in its direction'
+            FloorNumber_IS_IN_CALLLIST AND  Movement of Elevator of collumn  IS ToBase of elevator 
+            OR FloorNumber_IS_IN_requests AND  Movement of Elevator of collumn  ISNOT  ToBase of elevator 
                 THEN 
-                    CALL DoorsAction USING Column Elevator
-                    SET callButtons (WITH Number SAME AS Column Elevator floorNumber) IsPressed to false
-                    SET FloorRequestButton (WITH Number SAME AS Column Elevator floorNumber) IsPressed to false
-                    REMOVE element with number SAME AS Column Elevator FloorNumber FROM requests AND calls
+                    CALL DoorsAction USING Collumn Elevator
+                    SET callButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
+                    SET FloorRequestButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
+                    REMOVE element with number SAME AS FloorNumber of Elevator of Collumn FROM requests AND calllist
         ENDIF
-    CASE Collumn calls IS NOT empty 
-        SET Column Elevator DestinationFloor to first Collumn callElement 
-    CASE requests IS NOT empty
-        SET Column Elevator DestinationFloor to first  elevator request
-    ENDCASE
+        CASE Collumn calllist IS NOT empty 
+            SET DestinationFloor of Elevator of Collumn to first Collumn callElement 
+        CASE requests IS NOT empty
+            SET DestinationFloor of Elevator of Collumn to first  elevator request
+        ENDCASE
 
     CALL displayFloorDisplay WITH FloorDisplay
 
     ENDWHILE
         
-    IF elevator FloorNumber SAME AS destinationFloor
+    IF FloorNumber of Elevator SAME AS destinationFloor
         THEN SET elevator Movement to false
-            CALL DoorsAction USING Column elevator
-            SET callButtons (WITH Number SAME AS destinationFloor) IsPressed to false
+            CALL StartTimer WITH elevator
+            CALL DoorsAction USING Collumn elevator
+            SET callButton (WITH Number SAME AS destinationFloor) IsPressed to false
     
     ENDIF
     SET elevator destinationFloor to null
@@ -338,29 +395,28 @@ SEQUENCE doorsAction USING elevator
     SET elevator Doors open to true
     wait openTime
    
-    SET elevator Doors safeToClose to false
-    WHILE elevator Doors safeToClose is false
-        CALL checkSafeToClose USING elevator Doors
-            IF elevator Doors safeToClose is true
-                THEN close elevator Doors
-                SET elevator Doors open to false
+    SET  safeToClose of Doors of elevator to false
+    WHILE safeToClose of Doors of elevator IS false
+        CALL checkSafeToClose USING  Doors of elevator
+            IF safeToClose of Doors of elevator IS true
+                THEN SET Doors of elevator  open to false
             ENDIF
     ENDWHILE
     
 ENDSEQUENCE
 
 SEQUENCE checkSafeToClose USING doors
-    IF doors PassengerDetector is false 'not activated'
+    IF  PassengerDetector of doors is false 'not activated'
         SET doors SafeToClose to true
 ENDSEQUENCE
 
 SEQUENCE selectCollumn USING Battery AND button
-    FOR every Battery Collumn
+    FOR every Collumn of collumnList of Battery
 
 
         CALL (IS_IN WITH button number AND Collumn ServedFloors)RETURNING buttonNumber_IS_IN_servedFloors
         IF  buttonNumber_IS_IN_servedFloors
-            THEN SET selectedCollumn to Collumn
+            THEN SET selectedCollumn to Collumn of collumnList of Battery
     ENDFOR
 
 ENDSEQUENCE
@@ -369,4 +425,63 @@ SEQUENCE displayInterface USING interfaceDisplay
     DISPLAY interfaceDisplay GOTO
     Display interfaceDisplay FloorServedBy
 
+ENDSEQUENCE
+
+
+SEQUENCE timerAdd USING Battery
+    FOR every Collumn of collumnList of Battery
+        FOR every Elevator of collumn 
+            INCREMENT elevator of collumn  Timer by +1
+        ENDFOR
+    ENDFOR
+
+ENDSEQUENCE
+
+SEQUENCE StartTimer USING elevator
+    SET  Timer of elevator to 0
+ENDSEQUENCE
+
+SEQUENCE goToIdle USING collumn and Battery
+    SET counter to 0
+    FOR every elevator of collumn 
+        IF movement IS false
+            THEN   
+                INCREMENT counter by +1
+        ENDIF
+    ENDFOR
+    IF counter IS 0
+        RETURN 'avoid a division by 0 on next line'
+    SET idleFloor to (floors DIVIDED BY (counter) ROUNDED DOWN)
+    SET counter to 1
+    FOR every elevator of collumn 
+        IF movement IS false
+            IF counter is 1
+                THEN 
+                    SET  destinationFloor of elevator of collumn to  Base of collumn of collumnlist of   Battery
+            ELSE
+                SET  destinationFloor of elevator of collumn  to (idleFloor MULTIPLIES counter)  
+                INCREMENT counter by +1
+                CALL moveElevator WITH elevator of collumn 
+            ENDIF
+        ENDIF
+    ENDFOR
+    
+
+ENDSEQUENCE
+
+SEQUENCE alarm USING collumn AND battery
+    FOR every collumn of collumnlist of  Battery
+        SET collumn Online to NOT battery ALARM 'true to be false and vice versa'    
+        FOR every elevator of collumn 
+            SET Online of elevator of collumn   to  Online of collumn
+        ENDFOR
+    ENDFOR
+ENDSEQUENCE
+
+SEQUENCE checkIfElevatorOnline USING collumn
+    FOR every elevator OF collumn
+        IF Online OF elevator OF collumn
+            ADD elevator OF collumn to  Online_elevatorlist of collumn
+        ENDIF
+    ENDFOR
 ENDSEQUENCE
