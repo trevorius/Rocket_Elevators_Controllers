@@ -292,7 +292,11 @@ SEQUENCE ModUsersRequest USING FloorRequestButton of FloorRequestButtonList of B
     ENDIF
                             
     ADD Number of FloorRequestButton of FloorRequestButtonList of Battery to RequestList of selectedElevator 
-    SORT RequestList of selectedElevator  to ascending (CALL magnitude WITH Requests of selectedElevator)
+    
+    IF ToBase OF selectedElevator IS up THEN
+        SORT RequestList of selectedElevator  to descending
+    ELSE
+        SORT RequestList of selectedElevator  to ascending 
     SET selectedElevator DestinationFloor to last Request
     CALL moveElevator USING selectedElevator AND selectedCollumn
     SET GOTO of interfaceDisplay of Battery  to selectedElevator
@@ -352,20 +356,20 @@ SEQUENCE moveElevator USING elevator AND Collumn
         ENDIF
 
         CALL (IS_IN WITH FloorNumber of Elevator AND CallList of Collumn ) RETURNING FloorNumber_IS_IN_CALLLIST
-        CALL (IS_IN WITH FloorNumber of Elevator of Collumn AND requests of elevator ) RETURNING FloorNumber_IS_IN_requests
+        CALL (IS_IN WITH FloorNumber of Elevator of Collumn AND requestlist of elevator ) RETURNING FloorNumber_IS_IN_requestlist
 
         IF 'elevator crosses a floor with a call or request in its direction'
             FloorNumber_IS_IN_CALLLIST AND  Movement of Elevator of collumn  IS ToBase of elevator 
-            OR FloorNumber_IS_IN_requests AND  Movement of Elevator of collumn  ISNOT  ToBase of elevator 
+            OR FloorNumber_IS_IN_requestlist AND  Movement of Elevator of collumn  ISNOT  ToBase of elevator 
                 THEN 
                     CALL DoorsAction USING Collumn Elevator
                     SET callButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
                     SET FloorRequestButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
-                    REMOVE element with number SAME AS FloorNumber of Elevator of Collumn FROM requests AND calllist
+                    REMOVE element with number SAME AS FloorNumber of Elevator of Collumn FROM requestlist AND calllist
         ENDIF
         CASE Collumn calllist IS NOT empty 
             SET DestinationFloor of Elevator of Collumn to first Collumn callElement 
-        CASE requests IS NOT empty
+        CASE requestlist IS NOT empty
             SET DestinationFloor of Elevator of Collumn to first  elevator request
         ENDCASE
 
