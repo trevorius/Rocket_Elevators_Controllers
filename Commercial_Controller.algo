@@ -1,11 +1,14 @@
+"code added in orange comments was added after the video for additional requirements"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 CLIENTs BUILDING
 
-    SET Battery to INSTANTIATE Battery WITH 66 AND 6 AND 3 AND 1 AND 1
+    SET Battery to INSTANTIATE Battery WITH 66 AND 6 AND 3 AND 1 AND 1 "AND 17 AND 9"
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 TEST SECTION
-    SET testBattery to INSTANTIATE Battery WITH 66 AND 6 AND 5 AND 1 AND 1
+    SET testBattery to INSTANTIATE Battery WITH 66 AND 6 AND 5 AND 1 AND 1 "AND 17 AND 9"
     SET selectedElevator to null
     
     'Floors deserved:
@@ -92,7 +95,7 @@ TEST SECTION
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND RCnumber
+DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND RCnumber "AND _leavingTime AND _arrivingTime"
     Stories : floors
     Floors : floors MINUS basements
     Basements : basements
@@ -107,6 +110,10 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
     ElevatorsPerCollumn : elevators
     FloorRequestButtonList: SET to empty list
     interfaceDisplay : SET to INSTANTIATE interfaceDisplay USING floors
+
+ "    leavingTime : _leavingTime 
+    arrivingTime : _arrivingTime
+ "
     
     
     SEQUENCE create_BCollumns USING NumberOfBasementCollumns AND ElevatorsPerCollumn AND Basements  AND FloorsPerCollumn
@@ -146,7 +153,7 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
         ENDWHILE
     ENDSEQUENCE
 
-       SEQUENCE create_FloorRequestButtonList USING Floors
+    SEQUENCE create_FloorRequestButtonList USING Floors
        SET counter to NEGATIVE basements
         WHILE counter LESS THAN Floors
             SET FloorRequestButton to INSTANTIATE FloorRequestButton WITH counter
@@ -158,8 +165,15 @@ DEFINE Battery USING floors AND basements AND elevators AND BaseFloorNumber AND 
     CALL create_Collumns WITH NumberOfCollumns AND ElevatorsPerCollumn AND Floors And FloorsPerCollumn AND Base
     CALL create_FloorRequestButtonList WITH Floors
 
+ "    SEQUENCE timeCheck USING leavingTime AND arrivingTime AND time
+        CASE time IS GRETATER THAN (arrivingTime - 1hour) OR SMALLER THAN (arrivingTime + 1hour)   
+            RETURN 'ARRIVING'
+        CASE time IS GRETATER THAN (leavingTime - 1hour) OR SMALLER THAN (leavingTime + 1hour)  
+            RETURN 'LEAVING'
 
-
+        ENDCASE
+    ENDSEQUENCE
+ "
 ENDDEFINE
 
 DEFINE interfaceDisplay USING floors
@@ -225,7 +239,9 @@ DEFINE Elevator USING id AND Location AND floors AND toBase
     RequestList: SET to empty list
     Timer : 0
     Online: true
-
+ "   MAXLOAD : 10000 Lb
+    LOAD : weightOfLoad
+ "
  
     SEQUENCE create_Doors 
         SET doors to INSTANTIATE Doors
@@ -233,9 +249,18 @@ DEFINE Elevator USING id AND Location AND floors AND toBase
     SEQUENCE create_FloorDisplay USING FloorNumber AND Movement
         Number : FloorNumber
         Direction : Movement 
+        MESSAGE : empty string
     ENDSEQUENCE
     
-    
+ "    SEQUENCE isElevatorFull USING MAXLOAD
+     IF LOAD SMALLER THAN MAXLOAD THEN  
+        RETURN false
+    ELSE RETURN true
+    ENDIF
+    ENDSEQUENCE
+ "
+
+    ENDSEQUENCE
     CALL create_Doors 
     CALL create_FloorDisplay WITH FloorNumber AND Movement
 
@@ -255,6 +280,8 @@ DEFINE Doors
 ENDDEFINE
 
 SET OnItsWay to Object
+"SET time to clockTIME
+"
 
 'sort sequence EDX week 3'
 'compare values array'
@@ -438,36 +465,44 @@ SEQUENCE sortElevatorsByDistance USING calledTo AND Collumn
 ENDSEQUENCE
 
 SEQUENCE moveElevator USING elevator AND Collumn 
-    
+
     WHILE FloorNumber of elevator  IS NOT elevator DestinationFloor
-        IF elevator DestinationFloor GREATER THAN FloorNumber of Elevator
-            THEN SET elevator Movement to up
-            INCREMENT floorNumber of elevator by +1
-            
-        ELSE 
-            SET elevator Movement to down
-            INCREMENT floorNumber of elevator by -1
-        ENDIF
 
-        CALL (IS_IN WITH FloorNumber of Elevator AND CallList of Collumn ) RETURNING FloorNumber_IS_IN_CALLLIST
-        CALL (IS_IN WITH FloorNumber of Elevator of Collumn AND requestlist of elevator ) RETURNING FloorNumber_IS_IN_requestlist
+ "       IF (CALL isElevatorFull OF elevator) returning false
+ "
 
-        IF 'elevator crosses a floor with a call or request in its direction'
-            FloorNumber_IS_IN_CALLLIST AND  Movement of Elevator of collumn  IS ToBase of elevator 
-            OR FloorNumber_IS_IN_requestlist AND  Movement of Elevator of collumn  ISNOT  ToBase of elevator 
-                THEN 
-                    CALL DoorsAction USING Collumn Elevator
-                    SET callButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
-                    SET FloorRequestButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
-                    REMOVE element with number SAME AS FloorNumber of Elevator of Collumn FROM requestlist AND calllist
-        ENDIF
-        CASE Collumn calllist IS NOT empty 
-            SET DestinationFloor of Elevator of Collumn to first Collumn callElement 
-        CASE requestlist IS NOT empty
-            SET DestinationFloor of Elevator of Collumn to first  elevator request
-        ENDCASE
 
-    CALL displayFloorDisplay WITH FloorDisplay
+            IF elevator DestinationFloor GREATER THAN FloorNumber of Elevator
+                THEN SET elevator Movement to up
+                INCREMENT floorNumber of elevator by +1
+                
+            ELSE 
+                SET elevator Movement to down
+                INCREMENT floorNumber of elevator by -1
+            ENDIF
+
+            CALL (IS_IN WITH FloorNumber of Elevator AND CallList of Collumn ) RETURNING FloorNumber_IS_IN_CALLLIST
+            CALL (IS_IN WITH FloorNumber of Elevator of Collumn AND requestlist of elevator ) RETURNING FloorNumber_IS_IN_requestlist
+
+            IF 'elevator crosses a floor with a call or request in its direction'
+                FloorNumber_IS_IN_CALLLIST AND  Movement of Elevator of collumn  IS ToBase of elevator 
+                OR FloorNumber_IS_IN_requestlist AND  Movement of Elevator of collumn  ISNOT  ToBase of elevator 
+                    THEN 
+                        CALL DoorsAction USING Collumn Elevator
+                        SET callButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
+                        SET FloorRequestButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed to false
+                        REMOVE element with number SAME AS FloorNumber of Elevator of Collumn FROM requestlist AND calllist
+            ENDIF
+            CASE Collumn calllist IS NOT empty 
+                SET DestinationFloor of Elevator of Collumn to first Collumn callElement 
+            CASE requestlist IS NOT empty
+                SET DestinationFloor of Elevator of Collumn to first  elevator request
+            ENDCASE
+
+            CALL displayFloorDisplay WITH FloorDisplay
+ "       ELSE 
+            SET MESSAGE of FloorDisplay of elevator to FULL
+ "
 
     ENDWHILE
         
@@ -549,21 +584,45 @@ SEQUENCE goToIdle USING collumn and Battery
     ENDFOR
     IF counter IS 0
         RETURN 'avoid a division by 0 on next line'
-    SET idleFloor to (floors DIVIDED BY (counter) ROUNDED DOWN)
-    SET counter to 1
-    FOR every elevator of collumn 
-        IF movement IS false
-            IF counter is 1
-                THEN 
-                    SET  destinationFloor of elevator of collumn to  Base of collumn of collumnlist of   Battery
-            ELSE
-                SET  destinationFloor of elevator of collumn  to (idleFloor MULTIPLIES counter)  
-                INCREMENT counter by +1
+    ENDIF
+
+ "    CALL timeCheck OF battery RETURNING timeOfDay
+
+    IF timeOfDay IS ARRIVING THEN  
+        FOR every elevator OF collumn
+            IF movement IS false THEN
+                SET  destinationFloor of elevator of collumn TO Base of collumn of collumnlist of Battery
                 CALL moveElevator WITH elevator of collumn 
             ENDIF
-        ENDIF
-    ENDFOR
-    
+        ENDFOR
+    ELSE IF timeOfDay IS LEAVING THEN
+        SET counter to 1
+        FOR every elevator of collumn 
+            IF movement IS false                
+                    SET  destinationFloor of elevator of collumn  TO (idleFloor MULTIPLIES counter)  
+                    INCREMENT counter by +1
+                CALL moveElevator WITH elevator of collumn 
+
+            ENDIF
+        ENDFOR
+    ELSE
+ "
+        SET idleFloor to (floors DIVIDED BY (counter) ROUNDED DOWN)
+        SET counter to 1
+        FOR every elevator of collumn 
+            IF movement IS false
+                IF counter is 1
+                    THEN 
+                        SET  destinationFloor of elevator of collumn TO Base of collumn of collumnlist of   Battery
+                ELSE
+                    SET  destinationFloor of elevator of collumn  TO (idleFloor MULTIPLIES counter)  
+                    INCREMENT counter by +1
+                ENDIF
+                CALL moveElevator WITH elevator of collumn 
+
+            ENDIF
+        ENDFOR
+    ENDIF
 
 ENDSEQUENCE
 

@@ -1,9 +1,10 @@
-this is the first week of Odysey program 
+this is the first week of Odyssey program 
 
-the exercise consists of writing the algorythms to controle 2 elevator situations: one residential and one corporate (which will be derived more than likeley from the first example).
+the exercise consists of writing the algorithms to control 2 elevator situations: one residential and one commercial (which will be derived more than likely from the first example).
 
-these algorythms are to be written in Pseudocode according to codeboxx standards in 2 files , one for each situation.
+these algorithms are to be written in Pseudocode according to codeboxx standards in 2 files , one for each situation.
 a video presenting the project is also to be made 2-5 minutes
+        https://www.youtube.com/watch?v=uw5BK0z-czg
 
 FIRST SCENARIO
 
@@ -29,19 +30,18 @@ the algorithm controlls :   - 1 battery
 
 ADDITIONAL REQUIREMENTS : 
 
-    //Logic of prioritization of elevators
+    Logic of prioritization of elevators
             
             - elevators will be called  first if moving towards the call
                                         second if stationary
                                         third if closer to their destination    
-    //Logic back to origin
+    Logic back to origin
             - positions for idle lifts evenly spread out 
     
-    //Security Logic status online/offline to be added and circomstances to be used
+    Security Logic status online/offline to be added and circomstances to be used
 
     Temporal logic
             - use building schedual to strategically position elevators
-            - measure waiting times for calls
+
     Loading Logic
             - detect if full (link to security)
-            -use with waiting time to get waiting time closer to average waiting time. 
