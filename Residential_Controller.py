@@ -1,88 +1,12 @@
 import time
+import math
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-'''
-SET BUILDING to INSTANTIATE BuildingSpecs WITH 10 AND 1 AND 2 AND AND 8 AND 18
-SET COLLUMN to INSTANTIATE Collumn WITH BUILDING Floors AND BUILDING Elevators
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-TEST SECTION
-
-    SET SelectedElevator to null
-
-    Scenario 1:
-        'Elevator A is Idle at floor 2'
-        SET floorNumber AND Movement  of elevator WITH ID:1 TO 2 AND false
-        'Elevator B is Idle at floor 6'
-        SET floorNumber AND Movement of elevator WITH ID:2 TO 6 AND false
-        'Someone is on floor 3 and wants to go to the 7th floor. '
-        SET IsPressed  of callButtonUP WITH number: 3 to true
-        CALL CallElevatorCheck WITH COLLUMN
-        SET IsPressed of FloorRequestButton With Number : 7 to true
-        CALL usersDestination WITH COLLUMN
-        'Elevator A is expected to be sent.
-        DISPLAY SelectedElevator
-
-
-    Scenario 2:
-        'Elevator A is Idle at floor 10 
-        SET floorNumber AND Movement of elevator WITH ID:1 TO 10 AND false
-        'Elevator B is idle at floor 3
-        SET floorNumber AND Movement of elevator WITH ID:2 TO 3 AND false
-        'Someone is on the 1st floor and requests the 6th floor. 
-        SET IsPressed  of callButtonUP WITH number: 1 to true
-        CALL CallElevatorCheck WITH COLLUMN
-        SET IsPressed of FloorRequestButton With Number : 6 to true
-        CALL usersDestination WITH COLLUMN
-        'Elevator B should be sent. 
-        DISPLAY SelectedElevator
-
-
-        '2 minutes later, someone else is on the 3rd floor and requests the 5th floor. 
-        SET IsPressed  of callButtonUP WITH number: 3 to true
-        CALL CallElevatorCheck WITH COLLUMN
-        SET IsPressed of FloorRequestButton With Number : 5 to true
-        CALL usersDestination WITH COLLUMN
-        'Elevator B should be sent.
-        DISPLAY SelectedElevator
-
-
-        'Finally, a third person is at floor 9 and wants to go down to the 2nd floor. 
-        SET IsPressed  of callButtonUP WITH number: 9 to true
-        CALL CallElevatorCheck WITH COLLUMN
-        SET IsPressed of FloorRequestButton With Number : 2 to true
-        CALL usersDestination WITH COLLUMN
-
-        'Elevator A should be sent.
-        DISPLAY SelectedElevator
-
-    Scenario 3:
-        'Elevator A is Idle at floor 10 
-        SET floorNumber AND Movement  of elevator WITH ID:1 TO 10 AND false
-        'Elevator B is Moving from floor 3 to floor 6
-        SET floorNumber AND Movement AND DestinationFloor of elevator WITH ID:1 TO 3 AND up AND 6
-        'Someone is on floor 3 and requests the 2nd floor. 
-        SET IsPressed  of callButtonUP WITH number: 3 to true
-        CALL CallElevatorCheck WITH COLLUMN
-        SET IsPressed of FloorRequestButton With Number : 2 to true
-        CALL usersDestination WITH COLLUMN
-        'Elevator A should be sent. 
-        DISPLAY SelectedElevator
-
-        '5 minutes later, someone else is on the 10th floor and wants to go to the 3rd. 
-        SET IsPressed  of callButtonUP WITH number: 10 to true
-        CALL CallElevatorCheck WITH COLLUMN
-        SET IsPressed of FloorRequestButton With Number : 3 to true
-        CALL usersDestination WITH COLLUMN
-
-        'Elevator B should be sent.
-        DISPLAY SelectedElevator
-'''
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #DEFINE BuildingSpecs USING floors AND collumns AND elevators AND _leavingTime AND _arrivingTime
  
 class Building:
-    ALARM : False
+    
 
     def __init__(self, numberOfFloors, numberOfColumns, _elevatorsPerColumn, _leavingTime, _arrivingTime):
         self.Floors= numberOfFloors
@@ -91,9 +15,23 @@ class Building:
         self.elevatorsPerColumn = _elevatorsPerColumn
         self.leavingTime = _leavingTime
         self.arrivingTime = _arrivingTime
+        self.ALARM = False
 
         self.create_Columns()
+
+    def alarm(self) : 
+        for column in self.ColumnList : 
+            column.Online = not self.ALARM
+            for elevator in column.ElevatorList : 
+                elevator.Online = column.Online
  
+    """SEQUENCE timeCheck USING leavingTime AND arrivingTime AND time
+        IF time IS GRETATER THAN (arrivingTime - 1hour) OR SMALLER THAN (arrivingTime + 1hour)   
+            RETURN 1
+        ENDIF
+    ENDSEQUENCE
+    """
+
     
     #SEQUENCE timeCheck USING leavingTime AND arrivingTime AND time
     #    IF time IS GRETATER THAN (arrivingTime - 1hour) OR SMALLER THAN (arrivingTime + 1hour)   
@@ -108,10 +46,6 @@ class Building:
             column = Column(ID, self.Floors, self.elevatorsPerColumn)
             self.ColumnList.append(column)
             ID += 1
-            
-
- 
-
 
 #DEFINE Collumn USING floors AND elevators
 class Column:
@@ -134,8 +68,6 @@ class Column:
         ID = 1
         while ID <= self.Floors:
             callButton = CallButton(ID)
-            #callButtonDown = CallButton(ID, "DOWN")
-            #self.CallButtonList.append(callButtonDown)
             self.CallButtonList.append(callButton)
             ID += 1
         
@@ -152,6 +84,7 @@ class Column:
                 self.CallList.append(callButton)
     
     def create_OnlineElevatorList (self):
+        self.OnlineElevatorList = []
         if self.Online :
             for elevator in self.ElevatorList :
                 if elevator.Online :
@@ -160,68 +93,168 @@ class Column:
     def sortElevatorsByDistance (self, destination):
         
         for elevator in self.OnlineElevatorList :
-            elevator.Distance = abs(elevator.FloorNumber - destination)
+            elevator.Distance = abs(destination - elevator.FloorNumber )
         def Distance (element): 
             return element.Distance
         self.OnlineElevatorList.sort(key=Distance)
-
-        
-       
-                    
+        print("closest elevator is " + str(self.OnlineElevatorList[0].ID))
 
     def RequestElevator(self, RequestedFloor, Direction):
         self.create_OnlineElevatorList()
         self.sortElevatorsByDistance ( RequestedFloor)
         selectedElevator = None
-        #print (RequestedFloor)
-        #print(self.OnlineElevatorList[0].ID)
         for elevator in self.OnlineElevatorList :
 
-            #CALL (magnitude WITH (FloorNumber of Elevator MINUS callButton Number)) RETURNING distanceToCall
-            distanceToCall = abs(elevator.FloorNumber - RequestedFloor)
-            #CALL (magnitude WITH (FloorNumber of Elevator MINUS Elevator DestinationFloor)) RETURNING distanceToDestination
-            distanceToDestination = abs(elevator.FloorNumber - elevator.DestinationFloor)
+            if elevator.DestinationFloor != None:
+                distanceToDestination = abs(elevator.FloorNumber - elevator.DestinationFloor)
+            else : 
+                distanceToDestination = 0
 
 
             
-            if  ((elevator.FloorNumber >= RequestedFloor and elevator.Movement == Direction == "DOWN")
-                or (elevator.FloorNumber <= RequestedFloor and elevator.Movement == Direction == "UP")) 
-                if distanceToCall <= distanceToDestination :     #'IF an elevator's travel takes it through button's floor on correct direction
-                    elevator.move(elevator.DestinationFloor)
+            if  ((elevator.FloorNumber >= RequestedFloor and elevator.Movement == Direction == "DOWN") or (elevator.FloorNumber <= RequestedFloor and elevator.Movement == Direction == "UP")) :
+                if elevator.Distance <= distanceToDestination :     #'IF an elevator's travel takes it through button's floor on correct direction
+                    self.move(elevator)
                 else :                                          # IF elevator travelling towards RequestedFloor on correct direction
-                    elevator.DestinationFloor = RequestedFloor
-                    elevator.move ()
-                
-                selectedElevator = elevator
-            
-            elif elevator.Movement is "IDLE" :
-                elevator.DestinationFloor = RequestedFloor
-                elevator.move ()
-                selectedElevator = elevator
-            
-        if selectedElevator is None
-            selectedElevator = self.OnlineElevatorList[-1]
-
-                
+                    elevator.DestinationList.append(RequestedFloor)
                     
-                    CASE Elevator Movement is false
-                            SET DestinationFloor of Elevator to Number of callElement 
-                            call moveElevator WITH Elevator
-                            SET SelectedElevator to elevator of Online_elevators of collumn
-                                
-                    CASE FloorNumber OF Elevator GREATER THAN Number of callElement  AND Movement of Elevator  IS up 
-                        OR FloorNumber of Elevator SMALLER THAN Number ofcallElement  AND Movement of Elevator  IS down
-                        go to next Elevator
-                            
-                    ENDCASE
-                ENDFOR
-            ENDIF
-        ENDFOR  
-        """      
+                
+                selectedElevator = elevator
+                print("elevator "+str(selectedElevator.ID)+ " was chosen")
+                self.move(selectedElevator)
+                return selectedElevator
+
+            
+            elif elevator.Movement == "IDLE" :
+                if RequestedFloor > elevator.FloorNumber :
+                    elevator.Movement = "UP"
+                else : 
+                    elevator.Movement = "DOWN"
+                elevator.DestinationList.append(RequestedFloor)
+                
+                selectedElevator = elevator
+                print("elevator "+str(selectedElevator.ID)+ " was chosen")
+                self.move(selectedElevator)
+                return selectedElevator
+
+            
+        if selectedElevator == None :
+            selectedElevator = self.OnlineElevatorList[-1]
+            selectedElevator.DestinationList.append(RequestedFloor)
+                
+        print("elevator "+str(selectedElevator.ID)+ " was chosen")
+        self.move(selectedElevator)
+        return selectedElevator
+
+    def move (self, elevator):
+        
+        elevator.DestinationList.sort()
+        if elevator.Movement == "UP" : 
+            elevator.DestinationFloor = elevator.DestinationList[-1]
+        elif elevator.Movement == "DOWN" :
+            elevator.DestinationFloor = elevator.DestinationList[0]
+        else :
+            elevator.DestinationFloor = elevator.DestinationList[0]
+
+        destination = elevator.DestinationFloor
+        print ("elevator "+str(elevator.ID)+" is moving from " + str(elevator.FloorNumber)+" to " + str(destination))
+
+        while not elevator.FloorNumber == destination : 
+
+            
+            
+
+            if elevator.Movement == "UP" :
+                elevator.FloorNumber += 1
+                
+            elif elevator.Movement == "DOWN" :
+                elevator.FloorNumber -= 1
+            
+
+                
+            print("elevator "+str(elevator.ID)+ " is on floor"+str(elevator.FloorNumber))
+            time.sleep(0.1)
+            
+            if elevator.FloorNumber in elevator.DestinationList :
+                elevator.openDoors()
+
+                request = FloorRequestButton (elevator.FloorNumber, elevator.ID)
+                request.IsPressed = True
+                
+                if request in elevator.FloorRequestButtonList :     
+                    index = elevator.FloorRequestButtonList.index(request)
+                    elevator.FloorRequestButtonList[index].IsPressed = False
+                    elevator.DestinationList.remove(elevator.FloorNumber)
+                    
+                call = CallButton(elevator.FloorNumber)
+                call.Direction = elevator.Movement
+                call.IsPressed = True
+
+                if call in self.CallList : 
+                    index = self.CallButtonList.index(call)
+                    self.CallButtonList[index].IsPressed = False
+                    self.CallList.remove(call)
+                    
+
+                elevator.FloorRequestButtonList[elevator.FloorNumber-1].IsPressed = False
+            if len(elevator.DestinationList) != 0 :
+                destination = elevator.DestinationList[0]
+                if destination > elevator.FloorNumber :
+                    elevator.Movement = "UP"
+                else : 
+                    elevator.Movement = "DOWN"
+
+            
+            
+        if elevator.FloorNumber == destination :
+            elevator.Movement = "IDLE" 
+            print("elevator " + str(elevator.ID) + " is IDLE")
+            
+            elevator.startTimer()
+            elevator.DestinationList.remove(elevator.FloorNumber)
 
 
 
 
+
+    def RequestFloor(self, elevator, RequestedFloor):
+        if elevator.Online == True :
+            elevator.DestinationList.append(RequestedFloor)
+            self.move(elevator)
+
+    def goToIdle (self) :
+
+        self.create_OnlineElevatorList()
+        counter = 0
+        for elevator in self.OnlineElevatorList : 
+            if elevator.Movement == "IDLE" :
+                if int(elevator.Timer) - int(time.time()) > 300 : 
+
+                    counter += 1
+                
+
+                """
+                Call timeCheck of BuildingSpecs RETURNING idleFloor
+                IF idleFloor not null THEN
+                    FOR every elevator of collumn 
+                        IF Movement IS false
+                            THEN
+                                SET  destinationFloor of elevator of collumn to idleFloor 
+                                CALL moveElevator WITH elevator of collumn 
+                        ENDIF
+                    ENDFOR
+                ELSE 
+                """      
+                idleFloor = math.floor(self.Floors / (counter +1))
+                counter = 1
+                for elevator in self.OnlineElevatorList : 
+                    if elevator.Movement == "IDLE" :
+                        if elevator.FloorNumber == idleFloor : 
+                            return
+                        else :  
+                            elevator.DestinationList.append(idleFloor * counter)
+                            self.move(elevator)
+                            counter += 1
 
 #DEFINE CallButton USING floor AND direction
 class CallButton :
@@ -243,9 +276,10 @@ class Elevator:
         self.Movement = "IDLE" #can be : up, down, or IDLE
         self.FloorRequestButtonList = []
         self.DestinationFloor = None 
+        self.DestinationList =[]
         self.Distance = None
         self.Doors = None
-        self.Timer = 0
+        self.Timer = time.time()
         self.Online = True
         self.RequestList = []
 
@@ -262,7 +296,6 @@ class Elevator:
         while number <= self.Floors:
             floorRequestButton = FloorRequestButton (number, self.ID)
             self.FloorRequestButtonList.append(floorRequestButton)
-            #print(str(self.ID)+" "+str(number))
             number +=1
 
     def create_Doors (self):
@@ -274,22 +307,51 @@ class Elevator:
             return False
         else: return True
 
-    def move (self, destination =self.DestinationFloor )
+    def openDoors(self) :
+        print("openning doors")
+        self.Doors.Open = True
+        self.Doors.SafeToClose = False
+        time.sleep(self.Doors.OpenTime)
+        
+        while self.Doors.SafeToClose == False :
+            self.Doors.checkSafeToClose ()
+        
+        if self.Doors.SafeToClose == True :
+            self.Doors.Open = True
+            print("closing Doors")
+        
+
+
+    def startTimer(self) : 
+        self.Timer = time.time()
 
 class FloorRequestButton:
-    IsPressed = False
+    
     def __init__ (self, _floor, ID):
         self.ID = ID
-        self.Number = _floor 
+        self.Number = _floor
+        IsPressed = False 
 
 class Doors:
     Open = False
-    OpenTime = 5
+    OpenTime = 1
     SafeToClose = True
-    PassengerDetector : False
+    PassengerDetector = False
+
+    def checkSafeToClose (self) : 
+        if self.PassengerDetector == False :
+            self.SafeToClose = True 
+        else : 
+            self.SafeToClose = False
 
 #SET time to clockTIME
-time = time.time()
+clocktime = time.time()
+
+
+
+#------------------------------------------------------------------------------------------------------------------------
+#      TEST ZONE
+
 
 build = Building (10, 1, 2, 8, 18)
 COLLUMN = build.ColumnList[0]
@@ -297,99 +359,178 @@ CALLLIST = COLLUMN.CallList
 
 
 build.ColumnList[0].CallButtonList[5].IsPressed = True
-build.ColumnList[0].CallButtonList[5].Direction = "DOWN"
+build.ColumnList[0].CallButtonList[5].Direction = "DOWN"    # to 3
 build.ColumnList[0].create_CallList()
 build.ColumnList[0].CallButtonList[7].IsPressed = True
-build.ColumnList[0].CallButtonList[7].Direction = "DOWN"
+build.ColumnList[0].CallButtonList[7].Direction = "DOWN"    # to 5
 build.ColumnList[0].create_CallList()
 build.ColumnList[0].CallButtonList[4].IsPressed = True
-build.ColumnList[0].CallButtonList[4].Direction = "UP"
+build.ColumnList[0].CallButtonList[4].Direction = "UP"      # to 10
 build.ColumnList[0].create_CallList()
 build.ColumnList[0].CallButtonList[6].IsPressed = True
-build.ColumnList[0].CallButtonList[6].Direction = "DOWN"
+build.ColumnList[0].CallButtonList[6].Direction = "DOWN"    # to 2
 
 COLLUMN.ElevatorList[0].FloorNumber = 2
 COLLUMN.ElevatorList[1].FloorNumber = 3
-
-COLLUMN.create_OnlineElevatorList()
-
-COLLUMN.sortElevatorsByDistance(4)
-print (COLLUMN.ElevatorList[0].FloorNumber)
-print (COLLUMN.OnlineElevatorList[0].FloorNumber)
-
-
-
-
-#print(dir(build.ColumnList[0].CallButtonList[3]))
+requestList = [3,5,10,2]
 
 build.ColumnList[0].create_CallList()
-#print(len(build.ColumnList[0].CallList))
-#print(build.ColumnList[0].CallList[0].Number)
 
+CALLLIST.reverse()
 
-#build.ColumnList[0].RequestElevator(build.ColumnList[0].CallList[2].Number, build.ColumnList[0].CallList[2].Direction)
+counter = 0
+while len(CALLLIST) != 0 :
+    call = CALLLIST[-1]
+    tmp = COLLUMN.RequestElevator(call.Number,call.Direction)
+    CALLLIST.pop(-1)
+    COLLUMN.RequestFloor(tmp,requestList[counter])
 
-#for call in CALLLIST:
-#    COLLUMN.RequestElevator(call.Number,call.Direction)
-
-""" object construction printouts
-    #print("column ID is :")
-    #print (build.ColumnList[0].ID)
-
-    #print("column contains Elevators:")
-    #print(len(build.ColumnList[0].ElevatorList))
+    counter +=1
 
 
 
-    #print("elevatorList[1].Floors")
-    #print(build.ColumnList[0].ElevatorList[1].Floors)
-    #print("there are request buttons :")
-    #print(len(build.ColumnList[0].ElevatorList[0].FloorRequestButtonList))
-    #print(build.ColumnList[0].ElevatorList[1].FloorRequestButtonList[5].ID)
-    #print(build.ColumnList[0].ElevatorList[0].ID)
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#TEST SECTION
 
 
+print ("_______________________________________     SCENARIO I ________________________________________________")
+Scenario1 = Building (10, 1, 2, 8, 18)
+scen1Column = Scenario1.ColumnList[0]
+scen1CALLS = scen1Column.CallList
+    
+#'Elevator A is Idle at floor 2'
+scen1Column.ElevatorList[0].FloorNumber = 2
+scen1Column.ElevatorList[0].Movement = "IDLE"
+#'Elevator B is Idle at floor 6'
+scen1Column.ElevatorList[1].FloorNumber = 6
+scen1Column.ElevatorList[1].Movement = "IDLE"
 
-    #print (range(build.ColumnList[0].ElevatorList[0].Floors))
-    #print("testElevator")
+#'Someone is on floor 3 and wants to go to the 7th floor. '
+scen1Column.CallButtonList[2].IsPressed = True
+scen1Column.CallButtonList[2].Direction = "UP"
+scen1Column.create_CallList()
+requestList = [7]
+    
+scen1CALLS.reverse()
 
-    #testElevator = Elevator(1,10)
-    #print("testElevator.Floors :")
-    #print (testElevator.Floors)
-    #print("there are requestbuttons in testElevator")
-    #print (len(testElevator.FloorRequestButtonList))
+counter = 0
+while len(scen1CALLS) != 0 :
+    call = scen1CALLS[-1]
+    print("checking call # "+ str(counter +1))
+    tmp = scen1Column.RequestElevator(call.Number,call.Direction)
 
-    #print("testColumn")
-    #testColumn = Column(1, 10, 2)
-    #print ("testColumn.ElevatorList[1].Floors")
-    #print (testColumn.ElevatorList[1].Floors)
-    #print ("len(testColumn.ElevatorList[1].FloorRequestButtonList)")
-    #print (len(testColumn.ElevatorList[1].FloorRequestButtonList))
-"""
+    scen1CALLS.pop(-1)
+    scen1Column.RequestFloor(tmp,requestList[counter])
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#sequences used as tools.
-"""
-    'sort SEQUENCE EDX week 3'
-    'compare values array'
-    SEQUENCE IS_IN USING value AND list     
-        FOR every element of list
-            IF value is SAME AS element
-                THEN RETURN true
-            ELSE RETURN false
-            ENDIF
-        ENDFOR
-    ENDSEQUENCE
+    counter +=1
         
+    print('Elevator A was expected to be sent from 3 tom 7.')
+       
 
-    'magnitude is the unsigned value of the variable'
-    SEQUENCE magnitude USING number     
-        IF number SMALLER THAN 0
-            THEN RETURN number MULTIPLIES -1
-        ELSE RETURN number
-        ENDIF
-    ENDSEQUENCE
-"""
+print ("_______________________________________     SCENARIO II ________________________________________________")
+Scenario2 = Building (10, 1, 2, 8, 18)
+scen2Column = Scenario2.ColumnList[0]
+scen2CALLS = scen2Column.CallList
+
+#'Elevator A is Idle at floor 10 
+scen2Column.ElevatorList[0].FloorNumber = 10
+scen2Column.ElevatorList[0].Movement = "IDLE"
+#'Elevator B is idle at floor 3
+scen2Column.ElevatorList[1].FloorNumber = 3
+scen2Column.ElevatorList[1].Movement = "IDLE"
+
+#'Someone is on the 1st floor and requests the 6th floor. 
+scen2Column.CallButtonList[0].IsPressed = True
+scen2Column.CallButtonList[0].Direction = "UP"
+scen2Column.create_CallList()
+requestList = []
+requestList.append(6)
+#'2 minutes later, someone else is on the 3rd floor and requests the 5th floor. 
+scen2Column.CallButtonList[2].IsPressed = True
+scen2Column.CallButtonList[2].Direction = "UP"
+scen2Column.create_CallList()
+
+requestList.append(5)
+
+#'Finally, a third person is at floor 9 and wants to go down to the 2nd floor. 
+scen2Column.CallButtonList[8].IsPressed = True
+scen2Column.CallButtonList[8].Direction = "DOWN"
+scen2Column.create_CallList()
+
+requestList.append(2)
+
+scen2CALLS.reverse()
+
+counter = 0
+while len(scen2CALLS) != 0 :
+    call = scen2CALLS[-1]
+    print("checking call # "+ str(counter +1))
+    tmp = scen2Column.RequestElevator(call.Number,call.Direction)
+
+    scen2CALLS.pop(-1)
+    scen2Column.RequestFloor(tmp,requestList[counter])
+
+    counter +=1
+        
+print('Elevator B (1to6) then B (3to5) and A (9to2) were expected to be sent.')
+
+
+
+print ("_______________________________________     SCENARIO III ________________________________________________")
+
+Scenario3 = Building (10, 1, 2, 8, 18)
+scen3Column = Scenario3.ColumnList[0]
+scen3CALLS = scen3Column.CallList
+
+#'Elevator A is Idle at floor 10 
+scen3Column.ElevatorList[0].FloorNumber = 10
+scen3Column.ElevatorList[0].Movement = "IDLE"
+#'Elevator B is Moving from floor 3 to floor 6
+scen3Column.ElevatorList[1].FloorNumber = 3
+scen3Column.ElevatorList[1].Movement = "UP"
+scen3Column.ElevatorList[1].DestinationFloor = 6
+scen3Column.ElevatorList[1].DestinationList = [6]
+
+
+
+#'Someone is on floor 3 and requests the 2nd floor. 
+
+scen3Column.CallButtonList[2].IsPressed = True
+scen3Column.CallButtonList[2].Direction = "DOWN"
+scen3Column.create_CallList()
+requestList = []
+requestList.append(2)
+
+
+
+#'5 minutes later, someone else is on the 10th floor and wants to go to the 3rd. 
+scen3Column.CallButtonList[9].IsPressed = True
+scen3Column.CallButtonList[9].Direction = "DOWN"
+scen3Column.create_CallList()
+
+requestList.append(3)
+
+
+
+
+scen3CALLS.reverse()
+
+counter = 0
+while len(scen3CALLS) != 0 :
+    call = scen3CALLS[-1]
+    print("checking call # "+ str(counter +1))
+    tmp = scen3Column.RequestElevator(call.Number,call.Direction)
+
+    scen3CALLS.pop(-1)
+    scen3Column.RequestFloor(tmp,requestList[counter])
+    for elevator in scen3Column.OnlineElevatorList : 
+        if elevator.DestinationList != [] :            
+            scen3Column.move(elevator)
+    counter +=1
+
+print("Elevator A (3to2) Then Elevator B (10to3) was expected to be sent.")
+ 
+ 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #EVENT LISTENERS
 '''
@@ -413,193 +554,3 @@ build.ColumnList[0].create_CallList()
 '''
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-'''
-SEQUENCE CallElevatorCheck USING collumn#to become RequestElevator(RequestedFloor, Direction)
-
-    //CALL checkIfElevatorOnline WITH collumn
-    
-    //CALL pressButton WITH CallButtons of collumn  
-    FOR every CallButton of CallButtons of collumn
-        IF CallButton IsPressed SAME AS true 
-            THEN ADD callButton to calls 
-        ENDIF
-    ENDFOR
-
-    //FOR every callElement of calls 
-
-    ENDFOR
-    CALL usersDestination WITH collumn
-
-               
-
-ENDSEQUENCE
-
-SEQUENCE usersDestination USING collumn# to become  RequestFloor (Elevator, RequestedFloor) 
-
-    CALL checkIfElevatorOnline WITH collumn
-
-
-    CALL pressButton WITH FloorRequestButtons
-    FOR every  Elevator of Collumn    
-        FOR every  FloorRequestButton of Elevator of Collumn 
-            IF FloorRequestButton of Elevator of Collumn IsPressed IS true                
-                ADD Number of FloorRequestButton of Elevator of Collumn to requests 
-                SORT requests ascending
-                CASE Movement of Elevator of Collumn IS up
-                    SET DestinationFloor of Elevator of Collumn to  last of requests
-                CASE Movement of Elevator of Collumn IS down
-                    SET DestinationFloor of Elevator of Collumn to first of requests                   
-                CASE Movement of Elevator of Collumn IS false
-
-                    CALL (magnitude WITH (FloorNumber of Elevator of Collumn MINUS first of requests)) RETURNING lowest
-                    CALL (magnitude WITH (last of requests MINUS FloorNumber of Elevator of Collumn)) RETURNING highest
-
-                    CASE lowest GREATER THAN highest
-                        SET DestinationFloor of Elevator of Collumn to first of requests
-                    CASE lowest SMALLER THAN highest
-                        SET DestinationFloor of Elevator of Collumn to last of requests
-                    CASE lowest SAME AS highest
-                        SET DestinationFloor of Elevator of Collumn to first of requests
-                    ENDCASE
-                ENDCASE
-            ENDIF
-        ENDFOR
-        CALL moveElevator USING  Elevator of Collumn 
-    ENDFOR
-ENDSEQUENCE
-
-
-
-SEQUENCE pressButton USING buttons 
-    FOR every button  of buttons
-        IF button is pressed
-            SET  IsPressed  of button to true
-        ENDIF 
-    ENDFOR
-ENDSEQUENCE
-
-SEQUENCE moveElevator USING Elevator of Collumn 
-    
-    WHILE FloorNumber of Elevator  IS NOT elevator DestinationFloor AND (CALL isElevatorFull OF elevator) returning false
-
-        IF elevator destinationFloor  GREATER THAN FloorNumber of Elevator 
-            THEN SET elevator Movement to up
-            INCREMENT floorNumber of elevator by +1
-            
-        ELSE 
-            SET elevator Movement to down
-            INCREMENT floorNumber of elevator by -1
-        ENDIF
-
-        CALL (IS_IN WITH FloorNumber of Elevator of Collumn   AND calls callElement Numbers) RETURNING FloorNumber_IS_IN_calls
-        CALL (IS_IN WITH FloorNumber of Elevator of Collumn AND requests) RETURNING FloorNumber_IS_IN_requests
-
-        IF  FloorNumber_IS_IN_calls AND Movement of Elevator of Collumn SAME AS callElement Direction
-            OR FloorNumber_IS_IN_requests 
-                THEN 
-                    CALL DoorsAction USING Elevator of Collumn 
-                    SET callButtons (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed  to false
-                    SET FloorRequestButton (WITH Number SAME AS FloorNumber of Elevator of Collumn) IsPressed  to false
-                    REMOVE element WITH number SAME AS FloorNumber of Elevator of Collumn FROM requests AND calls
-        ENDIF
-    'catch missed calls'
-    CASE calls IS NOT empty
-        SET DestinationFloor of Elevator of Collumn to first callElement Number
-    CASE requests IS NOT empty
-        SET DestinationFloor of Elevator of Collumn to first request
-    ENDCASE
-    ENDWHILE
-        
-    IF FloorNumber of Elevator SAME AS destinationFloor
-        THEN SET elevator Movement to false
-            CALL StartTimer WITH elevator
-            CALL DoorsAction WITH Elevator of Collumn 
-            SET callButtons WITH Number SAME AS destinationFloor IsPressed  to false
-    
-    ENDIF
-    SET destinationFloor of elevator  to null
-ENDSEQUENCE
-
-SEQUENCE doorsAction USING elevator
-    SET  open of  Doors of elevator to true
-    wait openTime
-   
-    SET  safeToClose of  Doors of elevator to false
-    WHILE safeToClose of  Doors of elevator is false
-        CALL checkSafeToClose USING elevator Doors
-            IF safeToClose of  Doors of elevator is true
-                THEN close elevator Doors
-                SET elevator Doors open to false
-            ENDIF
-    ENDWHILE
-    
-ENDSEQUENCE
-
-SEQUENCE checkSafeToClose USING doors
-    IF PassengerDetector of doors  is false 'not activated'
-        SET SafeToClose of doors  to true
-ENDSEQUENCE
-
-SEQUENCE timerAdd USING Battery
-    FOR every  collumn of Battery
-        FOR every Elevator of collumn of Battery
-            INCREMENT Timer of elevator of collumn of Battery by +1
-        ENDFOR
-    ENDFOR
-
-ENDSEQUENCE
-
-SEQUENCE StartTimer USING elevator
-    SET  Timer of elevator to 0
-ENDSEQUENCE
-
-SEQUENCE goToIdle USING collumn and BuildingSpecs
-    SET counter to 0
-    FOR every elevator of collumn 
-        IF Movement IS false
-            THEN   
-                INCREMENT counter by +1
-        ENDIF
-    ENDFOR
-
-    
-     Call timeCheck of BuildingSpecs RETURNING idleFloor
-    IF idleFloor not null THEN
-        FOR every elevator of collumn 
-            IF Movement IS false
-                THEN
-                    SET  destinationFloor of elevator of collumn to idleFloor 
-                    CALL moveElevator WITH elevator of collumn 
-            ENDIF
-        ENDFOR
-    ELSE       
- 
-        SET idleFloor to (floors DIVIDED BY (counter PLUS 1) ROUNDED DOWN)
-        SET counter to 1
-        FOR every elevator of collumn 
-            IF Movement IS false
-                THEN
-                    SET  destinationFloor of elevator of collumn to (idleFloor MULTIPLIES counter)  
-                    INCREMENT counter by +1
-                    CALL moveElevator WITH elevator of collumn 
-            ENDIF
-        ENDFOR
-    ENDIF
-
-ENDSEQUENCE
-
-SEQUENCE alarm USING collumn AND BUILDING
-    SET collumn Online to NOT BUILDING ALARM 'true to be false and vice versa'
-    FOR every elevator of collumn 
-        SET Online of elevator of collumn  to  Online of collumn
-    ENDFOR
-ENDSEQUENCE
-
-SEQUENCE checkIfElevatorOnline USING collumn
-    FOR every elevator OF collumn
-        IF Online OF elevator OF collumn
-            ADD elevator OF collumn to Online_elevators of collumn 
-        ENDIF
-    ENDFOR
-ENDSEQUENCE
-'''
