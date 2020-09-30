@@ -120,7 +120,7 @@ class Column:
                     
                 
                 selectedElevator = elevator
-                print("elevator "+str(selectedElevator.ID)+ " was chosen")
+                print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
                 self.move(selectedElevator)
                 return selectedElevator
 
@@ -133,7 +133,7 @@ class Column:
                 elevator.DestinationList.append(RequestedFloor)
                 
                 selectedElevator = elevator
-                print("elevator "+str(selectedElevator.ID)+ " was chosen")
+                print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
                 self.move(selectedElevator)
                 return selectedElevator
 
@@ -142,7 +142,7 @@ class Column:
             selectedElevator = self.OnlineElevatorList[-1]
             selectedElevator.DestinationList.append(RequestedFloor)
                 
-        print("elevator "+str(selectedElevator.ID)+ " was chosen")
+            print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
         self.move(selectedElevator)
         return selectedElevator
 
@@ -212,6 +212,8 @@ class Column:
             
             elevator.startTimer()
             elevator.DestinationList.remove(elevator.FloorNumber)
+            
+            #self.goToIdle()
 
 
 
@@ -333,10 +335,11 @@ class FloorRequestButton:
         IsPressed = False 
 
 class Doors:
-    Open = False
-    OpenTime = 1
-    SafeToClose = True
-    PassengerDetector = False
+    def __init__(self) : 
+        self.Open = False
+        self.OpenTime = 1
+        self.SafeToClose = True
+        self.PassengerDetector = False
 
     def checkSafeToClose (self) : 
         if self.PassengerDetector == False :
