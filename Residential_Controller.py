@@ -1,6 +1,9 @@
 import time
 import math
 
+
+
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #DEFINE BuildingSpecs USING floors AND collumns AND elevators AND _leavingTime AND _arrivingTime
@@ -20,6 +23,8 @@ class Building:
         self.create_Columns()
 
     def alarm(self) : 
+        self.ALARM= not self.ALARM
+        print("WARNING! WARNING! WARNING! ALARM IS ON WARNING! WARNING! WARNING! ")
         for column in self.ColumnList : 
             column.Online = not self.ALARM
             for elevator in column.ElevatorList : 
@@ -101,50 +106,55 @@ class Column:
 
     def RequestElevator(self, RequestedFloor, Direction):
         self.create_OnlineElevatorList()
-        self.sortElevatorsByDistance ( RequestedFloor)
-        selectedElevator = None
-        for elevator in self.OnlineElevatorList :
+        if len(self.OnlineElevatorList) != 0 :     
+            self.sortElevatorsByDistance ( RequestedFloor)
+            selectedElevator = None
+            for elevator in self.OnlineElevatorList :
 
-            if elevator.DestinationFloor != None:
-                distanceToDestination = abs(elevator.FloorNumber - elevator.DestinationFloor)
-            else : 
-                distanceToDestination = 0
+                if elevator.DestinationFloor != None:
+                    distanceToDestination = abs(elevator.FloorNumber - elevator.DestinationFloor)
+                else : 
+                    distanceToDestination = 0
 
 
-            
-            if  ((elevator.FloorNumber >= RequestedFloor and elevator.Movement == Direction == "DOWN") or (elevator.FloorNumber <= RequestedFloor and elevator.Movement == Direction == "UP")) :
-                if elevator.Distance <= distanceToDestination :     #'IF an elevator's travel takes it through button's floor on correct direction
-                    self.move(elevator)
-                else :                                          # IF elevator travelling towards RequestedFloor on correct direction
+                
+                if  ((elevator.FloorNumber >= RequestedFloor and elevator.Movement == Direction == "DOWN") or (elevator.FloorNumber <= RequestedFloor and elevator.Movement == Direction == "UP")) :
+                    if elevator.Distance <= distanceToDestination :     #'IF an elevator's travel takes it through button's floor on correct direction
+                        self.move(elevator)
+                    else :                                          # IF elevator travelling towards RequestedFloor on correct direction
+                        elevator.DestinationList.append(RequestedFloor)
+                        
+                    
+                    selectedElevator = elevator
+                    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
+                    self.move(selectedElevator)
+                    return selectedElevator
+
+                
+                elif elevator.Movement == "IDLE" :
+                    if RequestedFloor > elevator.FloorNumber :
+                        elevator.Movement = "UP"
+                    else : 
+                        elevator.Movement = "DOWN"
                     elevator.DestinationList.append(RequestedFloor)
                     
-                
-                selectedElevator = elevator
-                print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
-                self.move(selectedElevator)
-                return selectedElevator
+                    selectedElevator = elevator
+                    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
+                    self.move(selectedElevator)
+                    return selectedElevator
 
-            
-            elif elevator.Movement == "IDLE" :
-                if RequestedFloor > elevator.FloorNumber :
-                    elevator.Movement = "UP"
-                else : 
-                    elevator.Movement = "DOWN"
-                elevator.DestinationList.append(RequestedFloor)
                 
-                selectedElevator = elevator
+            if selectedElevator == None :
+                selectedElevator = self.OnlineElevatorList[-1]
+                selectedElevator.DestinationList.append(RequestedFloor)
+                    
                 print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
-                self.move(selectedElevator)
-                return selectedElevator
+            self.move(selectedElevator)
+            return selectedElevator
+        else :
+            print("elevators of column "+ str(self.ID)+ " are offline" )
+            return
 
-            
-        if selectedElevator == None :
-            selectedElevator = self.OnlineElevatorList[-1]
-            selectedElevator.DestinationList.append(RequestedFloor)
-                
-            print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          elevator "+str(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
-        self.move(selectedElevator)
-        return selectedElevator
 
     def move (self, elevator):
         
@@ -213,16 +223,20 @@ class Column:
             elevator.startTimer()
             elevator.DestinationList.remove(elevator.FloorNumber)
             
-            #self.goToIdle()
+            # self.goToIdle)
 
 
 
 
 
     def RequestFloor(self, elevator, RequestedFloor):
-        if elevator.Online == True :
-            elevator.DestinationList.append(RequestedFloor)
-            self.move(elevator)
+        if elevator != None : 
+            if elevator.Online == True :
+                elevator.DestinationList.append(RequestedFloor)
+                self.move(elevator)
+        else : 
+            print("request can't be dealt, there is no elevator")
+            return
 
     def goToIdle (self) :
 
@@ -230,9 +244,9 @@ class Column:
         counter = 0
         for elevator in self.OnlineElevatorList : 
             if elevator.Movement == "IDLE" :
-                if int(elevator.Timer) - int(time.time()) > 300 : 
+                #if int(elevator.Timer) - int(time.time()) > 300 : 
 
-                    counter += 1
+                counter += 1
                 
 
                 """
@@ -247,16 +261,16 @@ class Column:
                     ENDFOR
                 ELSE 
                 """      
-                idleFloor = math.floor(self.Floors / (counter +1))
-                counter = 1
-                for elevator in self.OnlineElevatorList : 
-                    if elevator.Movement == "IDLE" :
-                        if elevator.FloorNumber == idleFloor : 
-                            return
-                        else :  
-                            elevator.DestinationList.append(idleFloor * counter)
-                            self.move(elevator)
-                            counter += 1
+            idleFloor = math.floor(self.Floors / (counter +1))
+            counter = 1
+            for elevator in self.OnlineElevatorList : 
+                if elevator.Movement == "IDLE" :
+                    if elevator.FloorNumber == idleFloor : 
+                        return
+                    else :  
+                        elevator.DestinationList.append(idleFloor * counter)
+                        self.move(elevator)
+                        counter += 1
 
 #DEFINE CallButton USING floor AND direction
 class CallButton :
@@ -359,6 +373,8 @@ clocktime = time.time()
 build = Building (10, 1, 2, 8, 18)
 COLLUMN = build.ColumnList[0]
 CALLLIST = COLLUMN.CallList
+
+build.alarm()
 
 
 build.ColumnList[0].CallButtonList[5].IsPressed = True
