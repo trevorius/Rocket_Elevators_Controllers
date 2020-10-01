@@ -179,56 +179,60 @@ class Column {
 
     RequestElevator( RequestedFloor, Direction){
         this.create_OnlineElevatorList();
-        this.sortElevatorsByDistance ( RequestedFloor);
-        let selectedElevator = null;
-        for (let i = 0 ; i < this.OnlineElevatorList.length ; i ++){ 
-            var elevator = this.OnlineElevatorList[i] ;
+        if(this.OnlineElevatorList.length !== 0){
+            this.sortElevatorsByDistance ( RequestedFloor);
+            let selectedElevator = null;
+            for (let i = 0 ; i < this.OnlineElevatorList.length ; i ++){ 
+                var elevator = this.OnlineElevatorList[i] ;
 
-            if (elevator.DestinationFloor != null){
-                const distanceToDestination = Math.abs(elevator.FloorNumber - elevator.DestinationFloor);
-            } else { 
-                const distanceToDestination = 0;
-            }
-
-
-            
-            if  ((elevator.FloorNumber >= RequestedFloor && elevator.Movement === Direction === "DOWN") || (elevator.FloorNumber <= RequestedFloor && elevator.Movement === Direction === "UP")) {
-                if (elevator.Distance <= distanceToDestination) {     //'IF an elevator's travel takes it through button's floor on correct direction
-                    this.move(elevator);
-                } else {                                          // IF elevator travelling towards RequestedFloor on correct direction
-                    elevator.DestinationList.push(RequestedFloor);
-                }    
-                
-                selectedElevator = elevator;
-                selectedElevator.DestinationList.push(RequestedFloor);
-
-                console.log("           XXXXXXXXXXXXXXXXXXXXXX          elevator "+(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXX");
-                this.move(selectedElevator);
-                return selectedElevator;
-            }else if (elevator.Movement === "IDLE") {
-                if (RequestedFloor > elevator.FloorNumber){
-                    elevator.Movement = "UP";
-                }else { 
-                    elevator.Movement = "DOWN";
-                    elevator.DestinationList.push(RequestedFloor);
+                if (elevator.DestinationFloor != null){
+                    const distanceToDestination = Math.abs(elevator.FloorNumber - elevator.DestinationFloor);
+                } else { 
+                    const distanceToDestination = 0;
                 }
-                selectedElevator = elevator;
+
+
+                
+                if  ((elevator.FloorNumber >= RequestedFloor && elevator.Movement === Direction === "DOWN") || (elevator.FloorNumber <= RequestedFloor && elevator.Movement === Direction === "UP")) {
+                    if (elevator.Distance <= distanceToDestination) {     //'IF an elevator's travel takes it through button's floor on correct direction
+                        this.move(elevator);
+                    } else {                                          // IF elevator travelling towards RequestedFloor on correct direction
+                        elevator.DestinationList.push(RequestedFloor);
+                    }    
+                    
+                    selectedElevator = elevator;
+                    selectedElevator.DestinationList.push(RequestedFloor);
+
+                    console.log("           XXXXXXXXXXXXXXXXXXXXXX          elevator "+(selectedElevator.ID)+ " was chosen XXXXXXXXXXXXXXXXX");
+                    this.move(selectedElevator);
+                    return selectedElevator;
+                }else if (elevator.Movement === "IDLE") {
+                    if (RequestedFloor > elevator.FloorNumber){
+                        elevator.Movement = "UP";
+                    }else { 
+                        elevator.Movement = "DOWN";
+                        elevator.DestinationList.push(RequestedFloor);
+                    }
+                    selectedElevator = elevator;
+                    selectedElevator.DestinationList.push(RequestedFloor);
+
+                    console.log("           XXXXXXXXXXXXXXXXXXXXXX          elevator "+(selectedElevator.ID)+ " was chosen           XXXXXXXXXXXXXXXXXXXXXX          ");
+                    this.move(selectedElevator);
+                    return selectedElevator;
+                }
+
+            } 
+
+            if (selectedElevator === null) {
+                selectedElevator = this.OnlineElevatorList[this.OnlineElevatorList.length-1];
                 selectedElevator.DestinationList.push(RequestedFloor);
-
-                console.log("           XXXXXXXXXXXXXXXXXXXXXX          elevator "+(selectedElevator.ID)+ " was chosen           XXXXXXXXXXXXXXXXXXXXXX          ");
-                this.move(selectedElevator);
-                return selectedElevator;
-            }
-
-        } 
-
-        if (selectedElevator === null) {
-            selectedElevator = this.OnlineElevatorList[this.OnlineElevatorList.length-1];
-            selectedElevator.DestinationList.push(RequestedFloor);
-        }        
-        console.log("           XXXXXXXXXXXXXXXXXXXXXX          elevator "+(selectedElevator.ID)+ " was chosen           XXXXXXXXXXXXXXXXXXXXXX          ")
-        this.move(selectedElevator)
-        return selectedElevator
+            }        
+            console.log("           XXXXXXXXXXXXXXXXXXXXXX          elevator "+(selectedElevator.ID)+ " was chosen           XXXXXXXXXXXXXXXXXXXXXX          ")
+            this.move(selectedElevator)
+            return selectedElevator
+        }else {console.log("elevators of column "+ this.ID+ " are offline" );
+            return;
+        }
     };
 
     goToIdle () {
@@ -357,10 +361,12 @@ class Column {
 
 
     RequestFloor( elevator, RequestedFloor){
-        if (elevator.Online ) {
+        if (elevator !== undefined) {
+            if (elevator.Online ) {
             elevator.DestinationList.push(RequestedFloor);
             this.move(elevator);
-        }
+            }else {console.log("elevator off line")}
+        }else {console.log("request can't be treated !!!")}
     }
 };
 
@@ -381,12 +387,25 @@ class Building{
         this.create_Columns();
     }
 
-    alarm() { 
-        for (let i = 0; i < this.ColumnList.length; i++) {
+    alarm() {
+        this.ALARM = !this.ALARM 
+        if (this.ALARM){
+            console.log("WARNING! WARNING! WARNING! ALARMS ARE ON WARNING! WARNING! WARNING!")
+            console.log("                                / \\   ");
+            console.log("                               /   \\   ");
+            console.log("                              /  |  \\   ");
+            console.log("                             /   |   \\   ");
+            console.log("                            /    |    \\   ");
+            console.log("                           /     o     \\   ");
+            console.log("                          /_____________\\   ");
+
+
+        }
+       for (let i = 0; i < this.ColumnList.length; i++) {
             var column = this.ColumnList[i] ; 
             column.Online = !this.ALARM;
             
-            for ( n = 0; n < column.ElevatorList; n++) {
+            for (let n = 0; n < column.ElevatorList; n++) {
                  var elevator = column.ElevatorList[n] ; 
                 elevator.Online = column.Online;
             }
@@ -506,6 +525,7 @@ runTest(CALLLIST, COLLUMN, requestList);
     var Scenario1 = new Building (10, 1, 2, 8, 18, "Scenario1");
     var scen1Column = Scenario1.ColumnList[0];
     var scen1CALLS = scen1Column.CallList;
+    //Scenario1.alarm()
 
     console.log(Scenario1.name)
     console.log(scen1Column.building)    
@@ -603,10 +623,9 @@ runTest(CALLLIST, COLLUMN, requestList);
     console.log("                                   Elevator A (3to2) Then Elevator B (10to3) was expected to be sent.")
 
     //bonus scenario
-    var sceneB = new Building(66, 4, 5, 8, 18, sceneB)
+    var sceneB = new Building(66, 4, 5, 8, 18, sceneB);
 
-    console.log(sceneB.ColumnList)
-    console.log(sceneB.ColumnList[3].ElevatorList)
+    sceneB.alarm();
 
     
  
