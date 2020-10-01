@@ -1,5 +1,4 @@
-//import time
-//import math
+var prompt = require('prompt-sync')()
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class FloorRequestButton{
@@ -282,7 +281,9 @@ class Column {
     };
 
     move ( elevator){
-        if ( !(elevator.isElevatorFull()) ){
+        if(elevator.isElevatorFull()) {
+            elevator.LOAD = prompt('ELEVATOR IS FULL !!! ENTER A LOAD < 10000');
+        }
             elevator.DestinationList.sort();
             if (elevator.Movement === "UP"){ 
                 elevator.DestinationFloor = elevator.DestinationList[elevator.DestinationList.length-1];
@@ -353,9 +354,7 @@ class Column {
                 var _this = this;
                 setTimeout(function(){_this.goToIdle()},10000);
             }
-        }else {
-            console.log("elevator is FULL")
-        }
+        
     }
 
 
@@ -444,7 +443,7 @@ class Building{
 //SET time to clockTIME
 var clocktime = new Date() ;
 
-//sleep function found on discord given by William Sinclair
+//sleep function found on discord given by William Jacques
 function sleep(miliseconds) {
     const start = new Date().getTime();
     while ((new Date().getTime()-start) < miliseconds){}
@@ -594,6 +593,8 @@ runTest(CALLLIST, COLLUMN, requestList);
     //'Elevator A is Idle at floor 10 
     scen3Column.ElevatorList[0].FloorNumber = 10;
     scen3Column.ElevatorList[0].Movement = "IDLE";
+    scen3Column.ElevatorList[0].LOAD = 2000000000000;
+
     //'Elevator B is Moving from floor 3 to floor 6
     scen3Column.ElevatorList[1].FloorNumber = 3;
     scen3Column.ElevatorList[1].Movement = "UP";
