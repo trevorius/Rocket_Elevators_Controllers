@@ -64,3 +64,7 @@ they must contain  the following methods :
         Method 2: RequestFloor (Elevator, RequestedFloor)
         Method 2 must move the elevators in its treatment.
 
+the python version runs in terminal using : python3 Residential_Controller.py
+the javascript version runs in the terminal also using nodeJS. once installed use:  node Residential_Controller.js
+
+
