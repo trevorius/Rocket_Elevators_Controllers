@@ -126,13 +126,13 @@ class Column
     
     for elevator in @onlineelevatorList 
       elevator.distance = (destination - elevator.floorNumber ).abs
+      print "elevator distance is :"
+      puts elevator.distance
     end
 
-    def distance (element) 
-      return element.distance
-    end
+    
 
-    @onlineelevatorList.sort_by{ |elevator| [elevator.distance] }  #(key=distance)
+    @onlineelevatorList.sort!{|elevatorA, elevatorB| elevatorA.distance <=> elevatorB.distance }  #(key=distance)
     puts("closest elevator is #{@onlineelevatorList[0].identity}")
   end
 
@@ -142,6 +142,9 @@ class Column
       sortElevatorsBydistance(requestedFloor)
       selectedElevator = nil
       for elevator in @onlineelevatorList 
+        print " checking "
+        print elevator.identity
+        print "#{elevator.movement}\n" 
 
         if elevator.destinationFloor != nil
           distanceToDestination = (elevator.floorNumber - elevator.destinationFloor).abs
@@ -149,11 +152,14 @@ class Column
           distanceToDestination = 0
         end
 
-        if  ((elevator.floorNumber >= requestedFloor && elevator.movement == direction && direction == "DOWN") || (elevator.floorNumber <= requestedFloor && elevator.movement == direction && direction == "UP")) 
+        if  ((elevator.floorNumber >= requestedFloor && elevator.movement == direction && direction == "DOWN") || (elevator.floorNumber <= requestedFloor && elevator.movement == direction && direction == "UP"))
+          puts "elevator is moving in the same direction as call" 
           if elevator.distance <= distanceToDestination    #'IF an elevator's travel takes it through button's floor on correct direction
+            puts "elevator is moving through destination"
             move(elevator)
           else                       # IF elevator travelling towards requestedFloor on correct direction
             elevator.destinationList << (requestedFloor)
+            puts " elevator is going towards floor "
           end
           
           selectedElevator = elevator
@@ -165,12 +171,14 @@ class Column
 
         
         elsif elevator.movement == "IDLE" 
+          puts "elevator was idle"
           if requestedFloor > elevator.floorNumber 
             elevator.movement = "UP"
           else  
             elevator.movement = "DOWN"
-          elevator.destinationList << (requestedFloor)
           end
+          elevator.destinationList << (requestedFloor)
+          
           
           selectedElevator = elevator
           puts("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX      elevator #{selectedElevator.identity} was chosen XXXXXXXXXXXXXXXXXXXXXXXXXX")
@@ -180,7 +188,9 @@ class Column
       end
 
         
-      if selectedElevator == nil 
+      if selectedElevator == nil
+        puts " all elevators are moving away from call"
+         
         selectedElevator = @onlineelevatorList[-1]
         selectedElevator.destinationList << (requestedFloor)
           
@@ -208,7 +218,7 @@ class Column
     end
 
       
-    elevator.destinationList.sort()
+    elevator.destinationList.sort!()
     if elevator.movement == "UP"  
       elevator.destinationFloor = elevator.destinationList[-1]
 
@@ -222,20 +232,20 @@ class Column
     destination = elevator.destinationFloor
     puts ("elevator #{elevator.identity} is moving from #{elevator.floorNumber} to #{destination}")
 
-    while ! elevator.floorNumber == destination   
+    while elevator.floorNumber != destination   
       
 
       if elevator.movement == "UP" 
         elevator.floorNumber += 1
         
-      elif elevator.movement == "DOWN" 
+      elsif elevator.movement == "DOWN" 
         elevator.floorNumber -= 1
       end
       
 
         
       puts("elevator #{elevator.identity} is on floor#{elevator.floorNumber}")
-      time.sleep(0.1)
+      #Time.sleep(0.1)
       
       if elevator.destinationList.include?(elevator.floorNumber) 
         elevator.opendoors()
@@ -248,8 +258,9 @@ class Column
           elevator.floorRequestButtonList[index].isPressed = false
           elevator.destinationList.remove(elevator.floorNumber)
         end
-          
-        call = CallButton(elevator.floorNumber)
+         
+        # create call to check if its in the list
+        call = CallButton.new(elevator.floorNumber)
         call.direction = elevator.movement
         call.isPressed = true
 
@@ -398,10 +409,10 @@ class Elevator
     puts("openning doors")
     @doors.open = true
     @doors.safeToClose = false
-    time.sleep(@doors.openTime)
+    #time.sleep(@doors.openTime)
     
     while @doors.safeToClose == false 
-      @doors.checksafeToClose ()
+      @doors.checksafeToClose 
     end
     
     if @doors.safeToClose == true 
@@ -454,8 +465,21 @@ clocktime = Time.now.to_i
 #------------------------------------------------------------------------------------------------------------------------
 #    TEST ZONE
 def run_test column, calls, requestList
-  calls.reverse()
+  puts"run_test"
+  for call in calls
+    print call.number
+    print "   "
+  end
 
+  calls.reverse!()
+  puts "reversed : "
+
+  for call in calls
+    print call.number
+    print "   "
+  end
+
+  
   counter = 0
   while calls.length() != 0 
     call = calls[-1]
