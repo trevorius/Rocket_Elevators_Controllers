@@ -235,11 +235,12 @@ class Column {
     };
 
     goToIdle () {
-
+        //console.log("goint to idle floor for " + this.building + " elevators" )
         //console.log(this.building + " elevators are going to Idle positions +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         sleep(1000);
         this.create_OnlineElevatorList();
         
+        //count idle elevators
         var counter = 0;
         for (let i = 0 ; i < this.OnlineElevatorList.length ; i++){ 
             let elevator = this.OnlineElevatorList[i] ;
@@ -248,6 +249,7 @@ class Column {
 
                 counter += 1
             }
+        //console.log ("there are " + counter + " idle elevators in "+ this.building)
         }
         
                 /*
@@ -261,20 +263,26 @@ class Column {
                         ENDIF
                     ENDFOR
                 ELSE 
-                */      
+                */   
+               
+        //calculate ideal idle floor
         var idleFloor = Math.floor(this.Floors / (counter +1)) ;
+
         counter = 1 ;
         for ( let i = 0 ; i < this.OnlineElevatorList.length; i++){ 
             const elevator = this.OnlineElevatorList[i] ; 
         
             if (elevator.Movement === "IDLE") {
-                if (elevator.FloorNumber !== idleFloor){ 
-                    elevator.DestinationList.push(idleFloor * counter);
+                if (elevator.FloorNumber !== idleFloor * (i+1)){ 
+                    elevator.DestinationList.push(idleFloor * (i+1));
                     this.move(elevator)
-                    counter += 1;
-                } else { return;
+                    
+                } else { 
+                    //console.log("elevator "+ elevator.ID + " has reached idle floor");
+                    
                 } 
             }
+        counter += 1;
         }
             
 
@@ -294,7 +302,7 @@ class Column {
             }
 
             let destination = elevator.DestinationFloor ;
-            console.log (this.building+" elevator "+(elevator.ID)+" is moving from " + (elevator.FloorNumber)+" to " + (destination));
+            console.log ("                              " + this.building+" elevator "+(elevator.ID)+" is moving from " + (elevator.FloorNumber)+" to " + (destination));
 
             while  (!(elevator.FloorNumber === destination)){            
 
@@ -352,7 +360,7 @@ class Column {
                 elevator.DestinationList.splice(elevator.DestinationList.indexOf(elevator.FloorNumber),1);
                 
                 var _this = this;
-                setTimeout(function(){_this.goToIdle()},10000);
+                setTimeout(function(){_this.goToIdle()},1000);
             }
         
     }
@@ -397,7 +405,8 @@ class Building{
             console.log("                            /    |    \\   ");
             console.log("                           /     o     \\   ");
             console.log("                          /_____________\\   ");
-
+        
+            sleep(500)
 
         }
        for (let i = 0; i < this.ColumnList.length; i++) {
@@ -443,8 +452,11 @@ class Building{
 //SET time to clockTIME
 var clocktime = new Date() ;
 
-//sleep function found on discord given by William Jacques
+//sleep function found on discord channel Jacques WARNING don't set too long.
 function sleep(miliseconds) {
+    if (miliseconds>2000){
+        milliseconds = 2000;
+    }
     const start = new Date().getTime();
     while ((new Date().getTime()-start) < miliseconds){}
 }
@@ -519,7 +531,7 @@ runTest(CALLLIST, COLLUMN, requestList);
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //TEST SECTION
-
+sleep(2000);
 
     console.log ("_______________________________________     SCENARIO I ________________________________________________");
     var Scenario1 = new Building (10, 1, 2, 8, 18, "Scenario1");
@@ -546,7 +558,7 @@ runTest(CALLLIST, COLLUMN, requestList);
             
     console.log('                                   Elevator A was expected to be sent from 3 tom 7.');
         
-
+    sleep(2000);
     console.log ("_______________________________________     SCENARIO II ________________________________________________");
     var Scenario2 = new Building (10, 1, 2, 8, 18, "scenario2");
     var scen2Column = Scenario2.ColumnList[0];
@@ -584,7 +596,7 @@ runTest(CALLLIST, COLLUMN, requestList);
     console.log('                           Elevator B (1to6) then B (3to5) && A (9to2) were expected to be sent.');
 
 
-
+    sleep(2000);
     console.log ("_______________________________________     SCENARIO III ________________________________________________");
 
     Scenario3 = new Building (10, 1, 2, 8, 18, "scenario3");
@@ -625,6 +637,9 @@ runTest(CALLLIST, COLLUMN, requestList);
     console.log("                                   Elevator A (3to2) Then Elevator B (10to3) was expected to be sent.")
 
     //bonus scenario
+    sleep(2000);
+    console.log ("_______________________________________     SCENARIO bonus ________________________________________________");
+
     var sceneB = new Building(66, 4, 5, 8, 18, sceneB);
 
     sceneB.alarm();

@@ -65,7 +65,7 @@ they must contain  the following methods :
         Method 2 must move the elevators in its treatment.
 
 the python version runs in terminal using : python3 Residential_Controller.py
-the javascript version runs in the terminal also using nodeJS. once installed use:  node Residential_Controller.js needs promp-sync to be installed (included in the repository)
+the javascript version runs in the terminal also using nodeJS. once installed use:  node Residential_Controller.js needs prompt-sync to be installed (already installed and included in the repository)
 
 all programs run automatically creating seperate buildings for each test scenario and displaying the elevator status and floors in the terminal logs.
 
