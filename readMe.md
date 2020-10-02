@@ -65,7 +65,7 @@ they must contain  the following methods :
         Method 2 must move the elevators in its treatment.
 
 the python version runs in terminal using : python3 Residential_Controller.py
-the javascript version runs in the terminal also using nodeJS. once installed use:  node Residential_Controller.js
+the javascript version runs in the terminal also using nodeJS. once installed use:  node Residential_Controller.js needs promp-sync to be installed (included in the repository)
 
 all programs run automatically creating seperate buildings for each test scenario and displaying the elevator status and floors in the terminal logs.
 
@@ -73,10 +73,11 @@ EXTRAS:
 
         - both JS and PY check the elevators online status and if they are full before moving. scenario III will not work unless you reduce the load in the full elevator to below 10 000 on prompt
 
-        - if you call Building.alarm() for any Building class (Scenario1, Scenario2, Scenario3) all online status will be switched to the opposite of the buildings alarm status that will log a warning message if it's alarm is switchend on. as displayd on scenB building (an example of a possibility to make buildings bigger and more complex in this case a 66 floor building with 4 collumns of 5 elevators)
+        - if you call Building.alarm() for any Building class (Scenario1, Scenario2, Scenario3) all online status will be switched to the opposite of the buildings alarm status that will log a warning message if it's alarm is switchend on. as displayd on scenB building (an example of a possibility to make buildings bigger and more complex in this case a 66 floor building with 4 collumns of 5 elevators) the alarm is also on the first test and displays the consequences of pushing buttons and trying to run the sequence on an offline column.
 
         - In Javascript a delayed callback function will move the idle elevators to a calculated ideal position dependant on how many elevators are Idle
 
+        -started work on a ruby file. it runs... has errors
 
 
 

@@ -480,11 +480,12 @@ function runTest(CALLS,COLUMN, REQUESTLIST ){
 
 }
 
-/* THIS WAS MY TEST SEQUENCE
+//THIS WAS MY TEST SEQUENCE
 var build = new Building (10, 1, 2, 8, 18, "build")
 var COLLUMN = build.ColumnList[0]
 var CALLLIST = COLLUMN.CallList
 
+build.alarm();
 
 build.ColumnList[0].CallButtonList[5].IsPressed = true;
 build.ColumnList[0].CallButtonList[5].Direction = "DOWN";    // to 3
@@ -513,7 +514,7 @@ build.ColumnList[0].create_CallList() ;
 
 runTest(CALLLIST, COLLUMN, requestList);
 
- */   
+    
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

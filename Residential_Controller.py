@@ -554,7 +554,7 @@ while len(scen3CALLS) != 0 :
 print("Elevator A (3to2) Then Elevator B (10to3) was expected to be sent.")
  
  #----------
-
+print("THIS IS A LAST TEST TO CREATE A BIGGER BUILDING AND TEST THE ALARMS ")
 scenB = Building (66, 4, 5, 8, 18)
 
 scenB.alarm ()
