@@ -281,8 +281,9 @@ class Column {
                     //console.log("elevator "+ elevator.ID + " has reached idle floor");
                     
                 } 
+            counter += 1;
+
             }
-        counter += 1;
         }
             
 
@@ -302,7 +303,7 @@ class Column {
             }
 
             let destination = elevator.DestinationFloor ;
-            console.log ("                              " + this.building+" elevator "+(elevator.ID)+" is moving from " + (elevator.FloorNumber)+" to " + (destination));
+            console.log (this.building+" elevator "+(elevator.ID)+" is moving from " + (elevator.FloorNumber)+" to " + (destination));
 
             while  (!(elevator.FloorNumber === destination)){            
 

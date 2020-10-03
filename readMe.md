@@ -88,6 +88,8 @@ All programs run automatically creating seperate buildings for each test scenari
 
 - if you call Building.alarm() for any Building class (Scenario1, Scenario2, Scenario3) all online status will be switched to the opposite of the buildings alarm status that will log a warning message if it's alarm is switchend on. As displayed on scenB building (an example of a possibility to make buildings bigger and more complex in this case a 66 floor building with 4 columns of 5 elevators) the alarm is also on the first test and displays the consequences of pushing buttons and trying to run the sequence on an offline column. 
 
-- In Javascript a delayed callback function will move the idle elevators to a calculated ideal position dependant on how many elevators are Idle  
+- all elevators check if they are overloaded before moving in scenario III you will have to enter a valid weight < 10 000 for it to run.
 
-- started work on a ruby file. 
+- In Javascript a delayed callback function will move the idle elevators to a calculated ideal position dependant on how many elevators are Idle . in python version the go to idle function will run at the end of each similation. 
+
+- started work on a ruby file. It can run the simulations the same way as python and javascript but doesn't use the goToIdle method. 

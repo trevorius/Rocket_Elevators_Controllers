@@ -11,14 +11,16 @@ import math
 class Building:
     
 
-    def __init__(self, numberOfFloors, numberOfColumns, _elevatorsPerColumn, _leavingTime, _arrivingTime):
+    def __init__(self, numberOfFloors, numberOfColumns, _elevatorsPerColumn, _leavingTime, _arrivingTime, name):
         self.Floors= numberOfFloors
         self.Columns = numberOfColumns
         self.ColumnList = []
         self.elevatorsPerColumn = _elevatorsPerColumn
         self.leavingTime = _leavingTime
         self.arrivingTime = _arrivingTime
-        self.ALARM = False
+        self.ALARM = False 
+
+        self.name = name
 
         self.create_Columns()
 
@@ -48,14 +50,14 @@ class Building:
     def create_Columns (self):
         ID = 1
         while ID <= self.Columns:
-            column = Column(ID, self.Floors, self.elevatorsPerColumn)
+            column = Column(ID, self.Floors, self.elevatorsPerColumn, self.name)
             self.ColumnList.append(column)
             ID += 1
 
 #DEFINE Collumn USING floors AND elevators
 class Column:
 
-    def __init__ (self, ID, _floors, _elevators):
+    def __init__ (self, ID, _floors, _elevators, building):
         self.ID = ID
         self.Floors = _floors
         self.numberOfElevators = _elevators
@@ -64,6 +66,8 @@ class Column:
         self.Online = True
         self.OnlineElevatorList = []
         self.CallList = []
+        
+        self.building = building
 
 
         self.create_Elevators()
@@ -230,7 +234,16 @@ class Column:
             elevator.startTimer()
             elevator.DestinationList.remove(elevator.FloorNumber)
             
-            # self.goToIdle
+            #print ("check floornumber against idlefloor")
+            #print (elevator.FloorNumber)
+            #print (elevator.idleFloor)
+            
+            
+            
+
+            if elevator.FloorNumber != elevator.idleFloor :
+                if sim == "end" :
+                    self.goToIdle()
        
     def RequestFloor(self, elevator, RequestedFloor):
         if elevator != None : 
@@ -241,13 +254,20 @@ class Column:
             print("request can't be dealt, there is no elevator")
             return
 
+
+
     def goToIdle (self) :
+
+        print ("SENDING " +str(self.building) + " ELEVATORS TO IDLE POSITIONS ...")
+
+        idleElevatorList = []
 
         self.create_OnlineElevatorList()
         counter = 0
-        for elevator in self.OnlineElevatorList : 
+        for elevator in self.OnlineElevatorList : #count idle elevators
             if elevator.Movement == "IDLE" :
                 #if int(elevator.Timer) - int(time.time()) > 300 : 
+                idleElevatorList.append(elevator)
 
                 counter += 1
                 
@@ -264,16 +284,16 @@ class Column:
                     ENDFOR
                 ELSE 
                 """      
-            idleFloor = math.floor(self.Floors / (counter +1))
-            counter = 1
-            for elevator in self.OnlineElevatorList : 
-                if elevator.Movement == "IDLE" :
-                    if elevator.FloorNumber == idleFloor : 
-                        return
-                    else :  
-                        elevator.DestinationList.append(idleFloor * counter)
-                        self.move(elevator)
-                        counter += 1
+        idleFloor = math.floor(self.Floors / (len(idleElevatorList) +1))
+        
+        counter = 1
+        for elevator in idleElevatorList : 
+            elevator.idleFloor = idleFloor * counter
+            if elevator.FloorNumber != idleFloor :                       
+                elevator.DestinationList.append(elevator.idleFloor)
+                elevator.destinationFloor = elevator.idleFloor
+                self.move(elevator)
+            counter += 1
 
 #DEFINE CallButton USING floor AND direction
 class CallButton :
@@ -304,6 +324,7 @@ class Elevator:
 
         self.MAXLOAD = 10000 
         self.LOAD = 0
+        self.idleFloor = 0
 
         self.create_FloorRequestButtons()
         self.create_Doors()
@@ -372,8 +393,36 @@ clocktime = time.time()
 #------------------------------------------------------------------------------------------------------------------------
 #      TEST ZONE
 
+def run_test(column , calls, requestList) :   
+    calls.reverse()
 
-build = Building (10, 1, 2, 8, 18)
+    counter = 0
+    while len(calls) != 0 :
+        call = calls[-1]
+        print("checking call # "+ str(counter +1))
+        tmp = column.RequestElevator(call.Number,call.Direction)
+
+        
+        
+        for elevator in column.OnlineElevatorList : 
+            if elevator.DestinationList != [] :            
+                column.move(elevator)
+
+        calls.pop(-1)
+        column.RequestFloor(tmp,requestList[counter])
+
+        counter +=1
+    global sim
+    sim = "end"
+    column.goToIdle()
+
+
+
+print ("---------------------------- a testbuilding on ALERT ")
+
+sim = "start"
+
+build = Building (10, 1, 2, 8, 18, "testbuilding")
 COLLUMN = build.ColumnList[0]
 CALLLIST = COLLUMN.CallList
 
@@ -398,25 +447,16 @@ requestList = [3,5,10,2]
 
 build.ColumnList[0].create_CallList()
 
-CALLLIST.reverse()
-
-counter = 0
-while len(CALLLIST) != 0 :
-    call = CALLLIST[-1]
-    tmp = COLLUMN.RequestElevator(call.Number,call.Direction)
-    CALLLIST.pop(-1)
-    COLLUMN.RequestFloor(tmp,requestList[counter])
-
-    counter +=1
-
-
+run_test(COLLUMN, CALLLIST, requestList)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #TEST SECTION
 
 
 print ("_______________________________________     SCENARIO I ________________________________________________")
-Scenario1 = Building (10, 1, 2, 8, 18)
+sim = "start"
+Scenario1 = Building (10, 1, 2, 8, 18, "Scenario1")
+this_building = Scenario1
 scen1Column = Scenario1.ColumnList[0]
 scen1CALLS = scen1Column.CallList
     
@@ -432,25 +472,17 @@ scen1Column.CallButtonList[2].IsPressed = True
 scen1Column.CallButtonList[2].Direction = "UP"
 scen1Column.create_CallList()
 requestList = [7]
+
+run_test(scen1Column, scen1CALLS, requestList)
     
-scen1CALLS.reverse()
-
-counter = 0
-while len(scen1CALLS) != 0 :
-    call = scen1CALLS[-1]
-    print("checking call # "+ str(counter +1))
-    tmp = scen1Column.RequestElevator(call.Number,call.Direction)
-
-    scen1CALLS.pop(-1)
-    scen1Column.RequestFloor(tmp,requestList[counter])
-
-    counter +=1
         
-    print('Elevator A was expected to be sent from 3 tom 7.')
+print('                         Elevator A was expected to be sent from 3 tom 7.')
        
 
 print ("_______________________________________     SCENARIO II ________________________________________________")
-Scenario2 = Building (10, 1, 2, 8, 18)
+sim = "start"
+
+Scenario2 = Building (10, 1, 2, 8, 18, "scenario2")
 scen2Column = Scenario2.ColumnList[0]
 scen2CALLS = scen2Column.CallList
 
@@ -481,26 +513,19 @@ scen2Column.create_CallList()
 
 requestList.append(2)
 
-scen2CALLS.reverse()
 
-counter = 0
-while len(scen2CALLS) != 0 :
-    call = scen2CALLS[-1]
-    print("checking call # "+ str(counter +1))
-    tmp = scen2Column.RequestElevator(call.Number,call.Direction)
-
-    scen2CALLS.pop(-1)
-    scen2Column.RequestFloor(tmp,requestList[counter])
-
-    counter +=1
+run_test(scen2Column, scen2CALLS,requestList)
         
-print('Elevator B (1to6) then B (3to5) and A (9to2) were expected to be sent.')
+print('                     Elevator B (1to6) then B (3to5) and A (9to2) were expected to be sent.')
 
 
 
 print ("_______________________________________     SCENARIO III ________________________________________________")
 
-Scenario3 = Building (10, 1, 2, 8, 18)
+sim = "start"
+
+
+Scenario3 = Building (10, 1, 2, 8, 18, "scenario3")
 scen3Column = Scenario3.ColumnList[0]
 scen3CALLS = scen3Column.CallList
 
@@ -534,28 +559,20 @@ scen3Column.create_CallList()
 requestList.append(3)
 
 
+run_test(scen3Column, scen3CALLS, requestList)
 
 
-scen3CALLS.reverse()
-
-counter = 0
-while len(scen3CALLS) != 0 :
-    call = scen3CALLS[-1]
-    print("checking call # "+ str(counter +1))
-    tmp = scen3Column.RequestElevator(call.Number,call.Direction)
-
-    scen3CALLS.pop(-1)
-    scen3Column.RequestFloor(tmp,requestList[counter])
-    for elevator in scen3Column.OnlineElevatorList : 
-        if elevator.DestinationList != [] :            
-            scen3Column.move(elevator)
-    counter +=1
-
-print("Elevator A (3to2) Then Elevator B (10to3) was expected to be sent.")
+print("             Elevator A (3to2) Then Elevator B (10to3) was expected to be sent.")
  
  #----------
-print("THIS IS A LAST TEST TO CREATE A BIGGER BUILDING AND TEST THE ALARMS ")
-scenB = Building (66, 4, 5, 8, 18)
+print ("---------------------------------------------------------------------------------------------")
+print ("---------------------------------------------------------------------------------------------")
+print ("---------------------------------------------------------------------------------------------")
+
+print("                 THIS IS A LAST TEST TO CREATE A BIGGER BUILDING AND TEST THE ALARMS ")
+print ("---------------------------------------------------------------------------------------------")
+
+scenB = Building (66, 4, 5, 8, 18, "commercialBuilding")
 
 scenB.alarm ()
 
