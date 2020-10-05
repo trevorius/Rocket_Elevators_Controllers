@@ -1,0 +1,23 @@
+﻿<Properties StartupConfiguration="{1F4B2513-5F72-47B2-A3B2-B1D28AAA16F1}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="commercial_Controller/Program.cs">
+    <Files>
+      <File FileName="commercial_Controller/Program.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="commercial_Controller" expanded="True" selected="True">
+            <Node name="commercial_Controller" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.commercial__Controller FirstBuild="True" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>

@@ -1,0 +1,58 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj": {}
+  },
+  "projects": {
+    "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj",
+        "projectName": "commercial_Controller",
+        "projectPath": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj",
+        "packagesPath": "/Users/trevorkitchen/.nuget/packages/",
+        "outputPath": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/trevorkitchen/.config/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/3.1.402/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
