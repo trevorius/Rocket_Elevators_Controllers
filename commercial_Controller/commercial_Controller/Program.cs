@@ -6,12 +6,17 @@ namespace commercial_Controller
     {
         static void Main(string[] args)
         {
-            Battery testBattery = new Battery(66, 21, 5, 1, 1, 8, 18);
+            Battery testBattery = new Battery(66, 6, 5, 5, 0, 8, 18);
 
             Console.WriteLine(testBattery.stories);
             //Console.WriteLine(testBattery.interfaceDisplay.goTo);
             //Console.WriteLine(testBattery.columnList[0]);
-            Console.WriteLine("column : {0}",testBattery.columnList[0].name.ToString());
+            //Console.WriteLine("column : {0}",testBattery.columnList[0].name.ToString());
+            
+             foreach (FloorRequestButton button in testBattery.FloorRequestButtonList)
+            {
+                Console.Write(" {0} ", button.name);
+            }
             foreach (Column element in testBattery.columnList )
             {
                 foreach (int i in element.floorsServed)
@@ -19,6 +24,8 @@ namespace commercial_Controller
                     Console.WriteLine(" column{1} serves : {0}", i.ToString(), element.name);
                 }
             }
+            
+
         }
 
     }

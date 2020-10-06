@@ -51,7 +51,9 @@ namespace commercial_Controller
 
             Console.WriteLine("basementcollumns : ");
             Console.WriteLine(numberOfBasementCollumns);
+
             createColumnList();
+            createFloorRequestButtonList();
             //public FloorRequestButton[] FloorRequestButtonList;
 
         }
@@ -65,10 +67,11 @@ namespace commercial_Controller
             createAboveGroundColumnList(numberOfCollumns, elevatorsPerCollumn, floors, baseFloor);
         }
 
-        private void createBasementColumnList(int basementColumns,int elevatorsPerCollumn,int basements, int baseFloor)
+        private void createBasementColumnList(int basementColumns, int elevatorsPerCollumn, int basements, int baseFloor)
         {
+            //calculate number of floors per coloumn for this battery
             int floorsPerColumn = (int)(basements / basementColumns);
-            Console.WriteLine("floorsPercolumn : {0}", floorsPerColumn);
+            Console.WriteLine("basements Percolumn : {0}", floorsPerColumn);
             int remFloorsPerColumn = basements % basementColumns;
             int columnCounter = 0;
             while (columnCounter < basementColumns)
@@ -85,16 +88,16 @@ namespace commercial_Controller
                 }
                 else
                 {   //if there are more basements to serve after this column
-                    if ((columnCounter + 1) * Battery.FloorsPerColumn < basements) 
+                    if ((columnCounter + 1) * floorsPerColumn < basements - remFloorsPerColumn)
                     {
-                        for (int i = columnCounter * Battery.FloorsPerColumn * -1; i >= (columnCounter + 1) * Battery.FloorsPerColumn * -1; i--)
+                        for (int i = columnCounter * floorsPerColumn * -1; i >= (columnCounter + 1) * floorsPerColumn * -1; i--)
                         {
                             basementsServed.Add(i);
                         }
                     }
                     else
                     {   //last column of basements
-                        for (int i = ((columnCounter * Battery.FloorsPerColumn) + 1) * -1; i >= (basements * -1); i--) 
+                        for (int i = ((columnCounter * floorsPerColumn) + 1) * -1; i >= (basements * -1); i--)
                         {
                             basementsServed.Add(i);
                         }
@@ -105,57 +108,92 @@ namespace commercial_Controller
                     basementsServed.Remove(0);
                 }
                 basementsServed.Add(baseFloor);
-                Column newColumn = new Column((columnCounter+1), basementsServed, elevatorsPerCollumn);
+                Column newColumn = new Column((columnCounter + 1 ), basementsServed, elevatorsPerCollumn);
                 columnList.Add(newColumn);
                 columnCounter++;
             }
         }
 
-        private void createAboveGroundColumnList(int numberOfCollumns, int elevatorsPerCollumn, int floors, int baseFloor)
+        private void createAboveGroundColumnList(int numberOfColumns, int elevatorsPerColumn, int floors, int baseFloor)
         {
-            /*
+            //calculate number of floors per coloumn for this battery
+            int floorsPerColumn = (int)(floors / numberOfColumns);
+            Console.WriteLine("floorsPercolumn : {0}", floorsPerColumn);
+            int remFloorsPerColumn = floors % numberOfColumns;
             int columnCounter = 0;
-            while (columnCounter < numberOfCollumns)
+            while (columnCounter < numberOfColumns)
             {
-                if (floors <= )
+                List<int> floorsServed = new List<int>();
+
+                if (floors <= Battery.FloorsPerColumn)
+                {
+                    for (int i = 1; i <= basements; i++)
+                    {
+                        floorsServed.Add(i);
+                    }
+
+                }
+                else
+                {   //if there are more floors to serve after this column
+                    if ((columnCounter + 1) * floorsPerColumn < floors - remFloorsPerColumn)
+                    {
+                        for (int i = columnCounter * floorsPerColumn +1; i <= (columnCounter + 1) * floorsPerColumn; i++)
+                        {
+                            floorsServed.Add(i);
+                        }
+                    }
+                    else
+                    {   //last column of basements
+                        for (int i = (columnCounter * floorsPerColumn) + 1; i <= floors; i++)
+                        {
+                            floorsServed.Add(i);
+                        }
+                    }
+                }
+                Console.WriteLine("RC is : {0}", rc);
+                if (rc != 0)
+                {
+                    floorsServed.Remove(0);
+                }
+                else
+                {
+                    if (columnCounter == numberOfCollumns - 1)
+                    {
+                        floorsServed.RemoveAt(floorsPerColumn-1);
+                    }
+                }
+                floorsServed.Remove(baseFloor);
+                floorsServed.Add(baseFloor);
+                Column newColumn = new Column((columnCounter + 1 + numberOfBasementCollumns), floorsServed, elevatorsPerCollumn);
+                columnList.Add(newColumn);
+                columnCounter++;
+                               
             }
-            
-    SEQUENCE create_Collumns USING NumberOfCollumns AND ElevatorsPerCollumn AND Floors And FloorsPerCollumn AND Base
-        SET CollumnCounter to 1
-        WHILE CollumnCounter LESS THAN collumnlist length
+        }
 
-            IF Floors LESS THAN FloorsPerCollumn + 1
-                Then SET floorsServed to a list of numbers from 1 to Floors
-                    ADD Base to floorsServed
-            ELSE SET floorsServed to a list of numbers from CollumnCounter MULTIPLIES FloorsPerCollumn to(CollumnCounter PLUS 1) MULTIPLIES FloorsPerCollumn
-                    IF RC NOT 0 THEN REMOVE 0 from floorsServed
-                    ADD Base to floorsServed
-            ENDIF
+        private void createFloorRequestButtonList()
+        {
+            for (int i = basements * -1 ; i <= floors ; i++ )
+            {
+                FloorRequestButton newFloorRequestButton = new FloorRequestButton(i);
+                FloorRequestButtonList.Add(newFloorRequestButton);
+                
+            }
+            if (rc != 0)
+            {
+                var RC = FloorRequestButtonList.Find(x => x.name == 0);
+                FloorRequestButtonList.Remove(RC);
+            }else
+            {
+                FloorRequestButtonList.RemoveAt(stories);
+            }
 
-            SET CollumnID to NumberOfBasementCollumns + CollumnCounter
-            SET Collumn to INSTANTIATE Collumn WITH CollumnID AND floorsServed AND ElevatorsPerCollumn
-            ADD Collumn to CollumnList
-            INCREMENT CollumnCounter by +1
-        ENDWHILE
-    ENDSEQUENCE
-            */
         }
     }
 }
 
 
-
-        
-           
-        
-
-       
-
-
-
-        
-    
-        /*
+    /*
     
 
     SEQUENCE create_FloorRequestButtonList USING Floors
@@ -166,9 +204,7 @@ namespace commercial_Controller
         ENDWHILE
     ENDSEQUENCE
     
-    CALL create_BCollumns WITH NumberOfBasementCollumns AND ElevatorsPerCollumn AND Basements  AND FloorsPerCollumn
-    CALL create_Collumns WITH NumberOfCollumns AND ElevatorsPerCollumn AND Floors And FloorsPerCollumn AND Base
-    CALL create_FloorRequestButtonList WITH Floors
+    
 
  "    SEQUENCE timeCheck USING leavingTime AND arrivingTime AND time
         CASE time IS GRETATER THAN (arrivingTime - 1hour) OR SMALLER THAN (arrivingTime + 1hour)   
@@ -181,22 +217,5 @@ namespace commercial_Controller
  "
 ENDDEFINE
              
-             */
-        /*
-            int columnCounter = 1;
-            while (columnCounter <= numberOfCollumns)
-            {
-
-                Column newColumn = new Column(columnCounter);
-                columnList.Add(newColumn);
-
-
-                columnCounter ++;
-            }
-
-                
-
-            
             */
-
    
