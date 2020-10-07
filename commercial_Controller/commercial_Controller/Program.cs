@@ -6,7 +6,7 @@ namespace commercial_Controller
     {
         static void Main(string[] args)
         {
-            Battery testBattery = new Battery(66, 6, 5, 5, 0, 8, 18);
+            Battery testBattery = new Battery(66, 6, 5, 1, 1, 8, 18);
 
             Console.WriteLine(testBattery.stories);
             //Console.WriteLine(testBattery.interfaceDisplay.goTo);
@@ -17,6 +17,9 @@ namespace commercial_Controller
             {
                 Console.Write(" {0} ", button.name);
             }
+
+            Console.WriteLine("  .  ");
+
             foreach (Column element in testBattery.columnList )
             {
                 foreach (int i in element.floorsServed)
@@ -24,7 +27,45 @@ namespace commercial_Controller
                     Console.WriteLine(" column{1} serves : {0}", i.ToString(), element.name);
                 }
             }
-            
+            //scenario 3
+            testBattery.columnList[3].elevatorList[0].floorNumber = 58;
+            testBattery.columnList[3].elevatorList[0].movement = "DOWN";
+            testBattery.columnList[3].elevatorList[0].destinationFloor = 1;
+            testBattery.columnList[3].elevatorList[1].floorNumber = 50;
+            testBattery.columnList[3].elevatorList[1].movement = "UP";
+            testBattery.columnList[3].elevatorList[1].destinationFloor = 60;
+            testBattery.columnList[3].elevatorList[2].floorNumber = 46;
+            testBattery.columnList[3].elevatorList[2].movement = "UP";
+            testBattery.columnList[3].elevatorList[2].destinationFloor = 58;
+            testBattery.columnList[3].elevatorList[3].floorNumber = 1;
+            testBattery.columnList[3].elevatorList[3].movement = "UP";
+            testBattery.columnList[3].elevatorList[3].destinationFloor = 54;
+            testBattery.columnList[3].elevatorList[4].floorNumber = 60;
+            testBattery.columnList[3].elevatorList[4].movement = "DOWN";
+            testBattery.columnList[3].elevatorList[4].destinationFloor = 1;
+
+            testBattery.columnList[3].RequestElevator(54);
+
+            //scenario 4
+
+            testBattery.columnList[0].elevatorList[0].floorNumber = -4;
+            testBattery.columnList[0].elevatorList[0].movement = "IDLE";
+            //testBattery.columnList[0].elevatorList[0].destinationFloor = null;
+            testBattery.columnList[0].elevatorList[1].floorNumber = 1;
+            testBattery.columnList[0].elevatorList[1].movement = "IDLE";
+            //testBattery.columnList[0].elevatorList[1].destinationFloor = null;
+            testBattery.columnList[0].elevatorList[2].floorNumber = -3;
+            testBattery.columnList[0].elevatorList[2].movement = "DOWN";
+            testBattery.columnList[0].elevatorList[2].destinationFloor = -5;
+            testBattery.columnList[0].elevatorList[3].floorNumber = -6;
+            testBattery.columnList[0].elevatorList[3].movement = "UP";
+            testBattery.columnList[0].elevatorList[3].destinationFloor = 1;
+            testBattery.columnList[0].elevatorList[4].floorNumber = -1;
+            testBattery.columnList[0].elevatorList[4].movement = "DOWN";
+            testBattery.columnList[0].elevatorList[4].destinationFloor = -6;
+
+            testBattery.columnList[0].RequestElevator(1);
+
 
         }
 

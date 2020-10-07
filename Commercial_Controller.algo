@@ -182,44 +182,6 @@ DEFINE interfaceDisplay USING floors
 
 ENDDEFINE
 
-DEFINE Collumn USING id AND floorList AND elevators
-    ID: id
-    CallButtonList : SET to empty list
-    ElevatorList : SET to empty list
-    CallList : SET to empty list
-    ServedFloorList : floorList
-    numberOfElevators: elevators
-    floors : ServedFloorList length
-    Online : true
-    Online_elevatorlist : SET to empty list
-
-    SEQUENCE create_CallButtonList USING floors
-        FOR every floor
-            SET callButton to INSTANTIATE callButton WITH floor 
-            ADD callButton to CallButtonList
-           
-        ENDFOR
-    ENDSEQUENCE
-    SEQUENCE create_elevatorlist USING elevators
-        IF first ServedFloor  LESS THAN 0
-            THEN SET toBase to up
-        ELSE SET toBase to down
-        ENDIF
-
-        SET counter to 1
-        WHILE counter LESS THAN elevators +1
-            SET Elevator to INSTANTIATE Elevator WITH counter AND O AND floors AND toBase
-            ADD ELevator to ElevatorList
-        ENDWHILE
-    ENDSEQUENCE
-
-    CALL create_CallButtonList WITH floors
-    CALL create_elevatorlist WITH elevators
-
-
-
-
-ENDDEFINE      
 
 DEFINE CallButton USING floor 
     Number : floor

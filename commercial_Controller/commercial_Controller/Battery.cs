@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace commercial_Controller
 {
@@ -54,7 +55,6 @@ namespace commercial_Controller
 
             createColumnList();
             createFloorRequestButtonList();
-            //public FloorRequestButton[] FloorRequestButtonList;
 
         }
 
@@ -108,7 +108,7 @@ namespace commercial_Controller
                     basementsServed.Remove(0);
                 }
                 basementsServed.Add(baseFloor);
-                Column newColumn = new Column((columnCounter + 1 ), basementsServed, elevatorsPerCollumn);
+                Column newColumn = new Column((columnCounter + 1 ), basementsServed, elevatorsPerCollumn, baseFloor);
                 columnList.Add(newColumn);
                 columnCounter++;
             }
@@ -143,7 +143,7 @@ namespace commercial_Controller
                         }
                     }
                     else
-                    {   //last column of basements
+                    {   //last column of floors
                         for (int i = (columnCounter * floorsPerColumn) + 1; i <= floors; i++)
                         {
                             floorsServed.Add(i);
@@ -164,7 +164,7 @@ namespace commercial_Controller
                 }
                 floorsServed.Remove(baseFloor);
                 floorsServed.Add(baseFloor);
-                Column newColumn = new Column((columnCounter + 1 + numberOfBasementCollumns), floorsServed, elevatorsPerCollumn);
+                Column newColumn = new Column((columnCounter + 1 + numberOfBasementCollumns), floorsServed, elevatorsPerCollumn, baseFloor);
                 columnList.Add(newColumn);
                 columnCounter++;
                                
@@ -181,7 +181,7 @@ namespace commercial_Controller
             }
             if (rc != 0)
             {
-                var RC = FloorRequestButtonList.Find(x => x.name == 0);
+                var RC = FloorRequestButtonList.Find(x => x.nameint == 0);
                 FloorRequestButtonList.Remove(RC);
             }else
             {
@@ -189,33 +189,107 @@ namespace commercial_Controller
             }
 
         }
+
+        public void pullAlarm()
+        {
+            alarm = !alarm;
+            if (alarm)
+            {
+                Console.WriteLine("WARNING! WARNING! WARNING! WARNING! ALARMS ARE RINGING WARNING! WARNING! WARNING! WARNING! WARNING! ");
+            }
+            foreach (Column column in columnList)
+            {
+                column.online = !alarm;
+                foreach (Elevator elevator in column.elevatorList)
+                {
+                    elevator.online = !alarm;
+                }
+            }
+                
+                
+        }
+
+        public Column selectColumn(int floor)
+        {
+            foreach(Column column in columnList)
+            {
+                if (column.floorsServed.Contains(floor))
+                {
+                    return column;
+                }
+            }
+            return null;
+        }
+
+        public void AssignElevator(int RequestedFloor)
+
+        {
+            Elevator selectedElevator = null;
+            int indexOfRequestedFloor = FloorRequestButtonList.IndexOf(FloorRequestButtonList.Where(button => button.nameint == RequestedFloor).FirstOrDefault());
+            FloorRequestButtonList[indexOfRequestedFloor].isPressed = true;
+
+            Column selectedColumn = null;
+            selectedColumn = selectColumn(RequestedFloor);
+
+            if (selectedColumn.online)
+            {
+
+                selectedColumn.createOnlineElevatorList();
+
+                selectedColumn.sortElevatorByDistance(baseFloor, selectedColumn.onlineElevatorList);
+
+                foreach (Elevator elevator in selectedColumn.onlineElevatorList)
+                {
+                    if (elevator.distance == 0 && elevator.movement == "IDLE")
+                    {
+                        selectedElevator = elevator;
+                    }
+                }
+                if (selectedColumn.checkIfElevatorOnItsWay(baseFloor)) 
+                {
+                    selectedElevator = selectedColumn.selectedElevator;
+                }
+                foreach (Elevator elevator in selectedColumn.onlineElevatorList)
+                {
+                    if (elevator.movement == "IDLE")
+                    {
+                        selectedElevator = elevator;
+                    }
+                }
+
+                if (selectedElevator == null)//all elevators are moving away from basefloor we will selectthe one whose last request is the smallest value.
+                { 
+                    selectedColumn.onlineElevatorList.Sort((x, y) => x.requestList[x.requestList.Count-1].CompareTo(y.requestList[y.requestList.Count-1]));
+                    selectedElevator = selectedColumn.onlineElevatorList[0];
+                }
+                selectedElevator.requestList.Add(RequestedFloor);
+
+                if (selectedElevator.toBase == "UP")
+                {
+                    selectedElevator.requestList.Sort((a, b) => b.CompareTo(a));// sortdescending
+                }
+                else
+                {
+                    selectedElevator.requestList.Sort((a, b) => a.CompareTo(b));//sort ascending
+                }
+                selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
+                selectedColumn.move(selectedElevator);
+
+                interfaceDisplay.goTo = ("xxxxxxxxxxxxxxxxxxxxxx Go to column {0}, elevator {1} to go to floor : {2} xxxxxxxxxxxxxxxxxxxxxxxxxx", selectedColumn.name, selectedElevator.name, RequestedFloor).ToString();
+                interfaceDisplay.display(interfaceDisplay.goTo);
+            }
+            else
+            {
+                interfaceDisplay.display("SORRY the column to your desired floor is offline.");
+            }
+                    
+
+        }
+
+
     }
 }
 
 
-    /*
     
-
-    SEQUENCE create_FloorRequestButtonList USING Floors
-       SET counter to NEGATIVE basements
-        WHILE counter LESS THAN Floors
-            SET FloorRequestButton to INSTANTIATE FloorRequestButton WITH counter
-            ADD FloorRequestButton to FloorRequestButtonList
-        ENDWHILE
-    ENDSEQUENCE
-    
-    
-
- "    SEQUENCE timeCheck USING leavingTime AND arrivingTime AND time
-        CASE time IS GRETATER THAN (arrivingTime - 1hour) OR SMALLER THAN (arrivingTime + 1hour)   
-            RETURN 'ARRIVING'
-        CASE time IS GRETATER THAN (leavingTime - 1hour) OR SMALLER THAN (leavingTime + 1hour)  
-            RETURN 'LEAVING'
-
-        ENDCASE
-    ENDSEQUENCE
- "
-ENDDEFINE
-             
-            */
    
