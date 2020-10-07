@@ -28,6 +28,8 @@ namespace commercial_Controller
 
         public Elevator selectedElevator;
 
+        public char nameLetter;
+
 
 
 
@@ -41,6 +43,8 @@ namespace commercial_Controller
             floors = floorsServed.Count;
             online = true;
             Base = aBase;
+
+            nameLetter = (char)(name + 64);
 
             calculateToBase();
             createElevatorList();
@@ -166,7 +170,22 @@ namespace commercial_Controller
         {
 
             Console.WriteLine("column {0} elevator {1} is on floor : {2}", name, elevator.name, elevator.floorNumber);
+            if (elevator.floorNumber == elevator.destinationFloor)
+            //elevator is at it's current destination, needs to check if it has other destinations lined up.
+            {
+                //if all calls or requests have not been fullfilled this will catch them
+                if (elevator.requestList.Count != 0)
+                {
+                    elevator.destinationFloor = elevator.requestList[0];
+                }
+                else if (callList.Count != 0)
+                {
+                    elevator.destinationFloor = callList[0];
+                }
 
+                //must open doors for potential passengers
+                elevator.Doors.action();
+            }
 
             while (elevator.floorNumber != elevator.destinationFloor)
 
@@ -260,7 +279,7 @@ namespace commercial_Controller
             if (elevator.floorNumber == elevator.destinationFloor)
             {
                 elevator.movement = "IDLE";
-                elevator.Doors.action();
+                //elevator.Doors.action();
                 int indexOfCall = callbuttonList.IndexOf(callbuttonList.Where(call => call.nameint == elevator.floorNumber).FirstOrDefault());
                 callbuttonList[indexOfCall].isPressed = false;
                 goToIdle();

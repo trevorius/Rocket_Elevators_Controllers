@@ -4,7 +4,7 @@ namespace commercial_Controller
     public class InterfaceDisplay
     {
         public string goTo;
-        public int gotoColumn;
+        public char gotoColumn;
         public int gotoElevator;
         public int gotoRequest;
         public string floorServedBy;

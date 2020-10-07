@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "commercial_Controller/1.0.0": {
+        "runtime": {
+          "commercial_Controller.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "commercial_Controller/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

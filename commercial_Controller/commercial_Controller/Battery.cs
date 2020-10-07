@@ -152,7 +152,6 @@ namespace commercial_Controller
                         }
                     }
                 }
-                Console.WriteLine("RC is : {0}", rc);
                 if (rc != 0)
                 {
                     floorsServed.Remove(0);
@@ -275,7 +274,7 @@ namespace commercial_Controller
                     selectedElevator.requestList.Sort((a, b) => a.CompareTo(b));//sort ascending
                 }
 
-                interfaceDisplay.gotoColumn = selectedColumn.name;
+                interfaceDisplay.gotoColumn = selectedColumn.nameLetter;
                 interfaceDisplay.gotoElevator = selectedElevator.name;
                 interfaceDisplay.gotoRequest = RequestedFloor;
 
@@ -283,6 +282,7 @@ namespace commercial_Controller
 
 
                 selectedElevator.destinationFloor = baseFloor;
+                selectedElevator.requestList.Add(RequestedFloor);
                 selectedColumn.move(selectedElevator);
 
 

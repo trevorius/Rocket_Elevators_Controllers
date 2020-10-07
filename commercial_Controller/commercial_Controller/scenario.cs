@@ -88,35 +88,51 @@ namespace commercial_Controller
 
         public static void scenario1(Battery battery)
         {
+            setup1(battery);
             battery.AssignElevator(20);
-            Console.WriteLine("\n.\n.\n.");
-            Console.WriteLine("column {0} elevator {1} was selected", battery.SelectedColumn.name, battery.SelectedElevator.name);
+            Console.WriteLine("\n\n\n");
+            Console.WriteLine("column {0} elevator {1} was selected", battery.SelectedColumn.nameLetter, battery.SelectedElevator.name);
             Console.WriteLine("elevator B5 was expected to be sent...");
-            Console.WriteLine("\n.\n.\n.");
+            Console.WriteLine("\n\n\n");
         }
         public static void scenario2(Battery battery)
         {
+            setup2(battery);
             battery.AssignElevator(36);
-            Console.WriteLine("\n.\n.\n.");
-            Console.WriteLine("column {0} elevator {1} was selected", battery.SelectedColumn.name, battery.SelectedElevator.name);
+            Console.WriteLine("\n\n\n");
+            Console.WriteLine("column {0} elevator {1} was selected", battery.SelectedColumn.nameLetter, battery.SelectedElevator.name);
             Console.WriteLine("elevator C1 was expected to be sent...");
-            Console.WriteLine("\n.\n.\n.");
+            Console.WriteLine("\n\n\n");
         }
         public static void scenario3(Battery battery)
         {
+            setup3(battery);
             battery.columnList[3].RequestElevator(54);
-            Console.WriteLine("\n.\n.\n.");
-            Console.WriteLine("column {0} elevator {1} was selected", battery.columnList[3].name, battery.SelectedElevator.name);
+            Console.WriteLine("\n\n\n");
+            Console.WriteLine("column {0} elevator {1} was selected", battery.columnList[3].nameLetter, battery.columnList[3].selectedElevator.name);
             Console.WriteLine("elevator D1 was expected to be sent...");
-            Console.WriteLine("\n.\n.\n.");
+            Console.WriteLine("\n\n\n");
         }
         public static void scenario4(Battery battery)
         {
+
+            setup4(battery);
             battery.columnList[0].RequestElevator(-3);
-            Console.WriteLine("\n.\n.\n.");
-            Console.WriteLine("column {0} elevator {1} was selected", battery.columnList[3].name, battery.SelectedElevator.name);
+
+            Console.WriteLine("\n\n\n");
+            Console.WriteLine("column {0} elevator {1} was selected", battery.columnList[0].nameLetter, battery.columnList[0].selectedElevator.name);
             Console.WriteLine("elevator A4 was expected to be sent...");
-            Console.WriteLine("\n.\n.\n.");
+            Console.WriteLine("\n\n\n");
+        }
+        public static void Drill(Battery battery)
+        {
+            battery.pullAlarm();
+            battery.AssignElevator(20);
+            Console.WriteLine("\n\n\n");
+            Console.WriteLine("Drill calls the alarm method thereby toggleing alarm status for the building, which in turn will toggle online status.");
+            Console.WriteLine(" I tried to run the assignement for scenario 1... if alarm's were on you would have got an error message.\n If not an elevator should have taken you to floor 20...");
+            Console.WriteLine("\n\n\n");
+
         }
 
     }

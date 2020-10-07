@@ -5,7 +5,7 @@
         <State name="__root__">
           <Node name="commercial_Controller" expanded="True">
             <Node name="commercial_Controller" expanded="True">
-              <Node name="Elevator.cs" selected="True" />
+              <Node name="Displays.cs" selected="True" />
             </Node>
           </Node>
         </State>
@@ -16,19 +16,21 @@
           <Value>elevator.destinationFloor</Value>
           <Value>callList</Value>
           <Value>floorNumber</Value>
+          <Value>selectedColumn</Value>
+          <Value>list</Value>
+          <Value>selectedElevator</Value>
+          <Value>elevator.requestList</Value>
+          <Value>onlineElevatorList</Value>
+          <Value>elevator</Value>
         </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.ItemProperties.commercial__Controller PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint enabled="false" file="/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/Program.cs" relfile="commercial_Controller/Program.cs" line="67" column="1" />
-      <Breakpoint enabled="false" file="/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/Column.cs" relfile="commercial_Controller/Column.cs" line="143" column="1" />
-      <Breakpoint enabled="false" file="/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/Column.cs" relfile="commercial_Controller/Column.cs" line="231" column="1" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
 </Properties>
