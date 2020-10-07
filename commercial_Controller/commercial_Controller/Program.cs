@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel.Design;
+using System.Threading;
 
 namespace commercial_Controller
 {
@@ -8,6 +10,58 @@ namespace commercial_Controller
         {
             Battery testBattery = new Battery(66, 6, 5, 1, 1, 8, 18);
 
+            Console.WriteLine("Building configuration for the test scenarios");
+            Thread.Sleep(500);
+
+            Console.WriteLine("The building floors are as Follows : ");
+            foreach (FloorRequestButton button in testBattery.FloorRequestButtonList)
+            {
+                Console.Write(" {0} ", button.name);
+            }
+
+            Scenario.setup1(testBattery);
+            Scenario.setup2(testBattery);
+            Scenario.setup3(testBattery);
+            Scenario.setup4(testBattery);
+
+            string selection = "";
+
+            while (selection != "exit")
+            {
+                Console.WriteLine("\n.\n.\n.");    
+                Console.WriteLine("Select scenario to run 1 - 2 - 3 - 4 - Drill - exit");
+                selection = Console.ReadLine();
+
+            
+                if(selection == "1")
+                {
+                    Scenario.scenario1(testBattery);
+
+                }
+                else if(selection == "2")
+                {
+                    Scenario.scenario2(testBattery);
+                }
+                else if (selection == "3")
+                {
+                    Scenario.scenario3(testBattery);
+                }
+                else if (selection == "4")
+                {
+                    Scenario.scenario4(testBattery);
+                }
+                else if (selection == "Drill")
+                {
+                    testBattery.pullAlarm();
+                    Scenario.scenario1(testBattery);
+                }
+            }
+
+
+
+
+
+            /*
             Console.WriteLine(testBattery.stories);
             //Console.WriteLine(testBattery.interfaceDisplay.goTo);
             //Console.WriteLine(testBattery.columnList[0]);
@@ -64,7 +118,9 @@ namespace commercial_Controller
             testBattery.columnList[0].elevatorList[4].movement = "DOWN";
             testBattery.columnList[0].elevatorList[4].destinationFloor = -6;
 
-            testBattery.columnList[0].RequestElevator(1);
+            testBattery.columnList[0].RequestElevator(-3);
+
+            */
 
 
         }

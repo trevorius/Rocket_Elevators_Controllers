@@ -225,9 +225,13 @@ namespace commercial_Controller
                         callList.Remove(elevator.floorNumber);
                         elevator.requestList.Remove(elevator.floorNumber);
                     }
-                    if (elevator.floorNumber == elevator.destinationFloor)
+
+
+
+                    if (elevator.floorNumber == elevator.destinationFloor)                       
                         //elevator has reached it's destination
                     {
+                        elevator.Doors.action();
                         //if all calls or requests have not been fullfilled this will catch them
                         if (callList.Count != 0)
                         {

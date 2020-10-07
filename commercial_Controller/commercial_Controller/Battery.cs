@@ -27,6 +27,8 @@ namespace commercial_Controller
 
         public InterfaceDisplay interfaceDisplay;
 
+        public Column SelectedColumn;
+        public Elevator SelectedElevator;
 
         //battery constructor
         public Battery(int aFloors, int aBasements, int elevators, int BaseFloorNumber, int RCnumber, int _leavingTime, int _arrivingTime)
@@ -272,11 +274,25 @@ namespace commercial_Controller
                 {
                     selectedElevator.requestList.Sort((a, b) => a.CompareTo(b));//sort ascending
                 }
-                selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
+
+                interfaceDisplay.gotoColumn = selectedColumn.name;
+                interfaceDisplay.gotoElevator = selectedElevator.name;
+                interfaceDisplay.gotoRequest = RequestedFloor;
+
+                interfaceDisplay.displaygoto();
+
+
+                selectedElevator.destinationFloor = baseFloor;
                 selectedColumn.move(selectedElevator);
 
-                interfaceDisplay.goTo = ("xxxxxxxxxxxxxxxxxxxxxx Go to column {0}, elevator {1} to go to floor : {2} xxxxxxxxxxxxxxxxxxxxxxxxxx", selectedColumn.name, selectedElevator.name, RequestedFloor).ToString();
-                interfaceDisplay.display(interfaceDisplay.goTo);
+
+
+                //selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
+                //selectedColumn.move(selectedElevator);
+
+                SelectedElevator = selectedElevator;
+                SelectedColumn = selectedColumn;
+                
             }
             else
             {

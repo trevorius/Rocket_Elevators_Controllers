@@ -4,6 +4,9 @@ namespace commercial_Controller
     public class InterfaceDisplay
     {
         public string goTo;
+        public int gotoColumn;
+        public int gotoElevator;
+        public int gotoRequest;
         public string floorServedBy;
         public string message;
 
@@ -16,6 +19,12 @@ namespace commercial_Controller
         {
             Console.WriteLine("interface Displays : {0}", msg);
         }
+        public void displaygoto()
+        {
+            Console.WriteLine("interface displays : ");
+            Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxx Go to column {0}, elevator {1} to go to floor : {2} xxxxxxxxxxxxxxxxxxxxxxxxxx", gotoColumn, gotoElevator, gotoRequest);
+        }
+
     }
 
     public class FloorDisplay
