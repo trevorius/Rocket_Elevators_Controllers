@@ -6,20 +6,6 @@
           <Node name="commercial_Controller" expanded="True" selected="True" />
         </State>
       </Pad>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>elevator.destinationFloor</Value>
-          <Value>elevator.destinationFloor</Value>
-          <Value>callList</Value>
-          <Value>floorNumber</Value>
-          <Value>selectedColumn</Value>
-          <Value>list</Value>
-          <Value>selectedElevator</Value>
-          <Value>elevator.requestList</Value>
-          <Value>onlineElevatorList</Value>
-          <Value>elevator</Value>
-        </State>
-      </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.ItemProperties.commercial__Controller PreferredExecutionTarget="MonoDevelop.Default" />

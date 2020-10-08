@@ -54,35 +54,46 @@ namespace commercial_Controller
         }
         public void RequestElevator(int FloorNumber)
         {
+            
+
             createOnlineElevatorList();
-
-            callList.Add(FloorNumber);
-
-            if (!checkIfElevatorOnItsWay(FloorNumber))
+            if (onlineElevatorList.Count != 0)
             {
-                sortElevatorByDistance(FloorNumber, onlineElevatorList);
+                callList.Add(FloorNumber);
 
-                selectedElevator = null;
-
-
-                foreach (Elevator elevator in onlineElevatorList)
+                if (!checkIfElevatorOnItsWay(FloorNumber))
                 {
-                    if (elevator.movement == "IDLE")
+                    sortElevatorByDistance(FloorNumber, onlineElevatorList);
+
+                    selectedElevator = null;
+
+
+                    foreach (Elevator elevator in onlineElevatorList)
                     {
-                        selectedElevator = elevator;
+                        if (elevator.movement == "IDLE")
+                        {
+                            selectedElevator = elevator;
+                        }
                     }
-                }
-                if (selectedElevator == null)
-                {
-                    selectedElevator = onlineElevatorList[onlineElevatorList.Count - 1];
-                    selectedElevator.requestList.Add(FloorNumber);
-                }
+                    if (selectedElevator == null)
+                    {
+                        selectedElevator = onlineElevatorList[onlineElevatorList.Count - 1];
+                        selectedElevator.requestList.Add(FloorNumber);
+                    }
 
+                }
+                Console.WriteLine("xxxxxxxxxxxxxxxxxxxx         elevator {0} was selected       xxxxxxxxxxxxxxxxxxxxx", selectedElevator.name);
+                selectedElevator.destinationFloor = Base;
+                move(selectedElevator);
             }
-            Console.WriteLine("xxxxxxxxxxxxxxxxxxxx         elevator {0} was selected       xxxxxxxxxxxxxxxxxxxxx", selectedElevator.name);
-            selectedElevator.destinationFloor = Base;
-            move(selectedElevator);
-
+            else
+            {
+                foreach(Elevator elevator in elevatorList)
+                {
+                    elevator.FloorDisplay.message = "OFFLINE";
+                    elevator.FloorDisplay.messageDisplay();
+                }
+            }
         }
 
 
@@ -235,8 +246,8 @@ namespace commercial_Controller
                     bool floorIsInRequestList = elevator.requestList.Contains(elevator.floorNumber);
 
                     //if elevator crosses a floor it should stop at (on a call or request list)
-                    if ((floorIsInCallList && elevator.movement == elevator.toBase) ||
-                        (floorIsInRequestList && elevator.movement != elevator.toBase))
+                    if ((floorIsInCallList && elevator.movement == elevator.toBase))
+                     //|| (floorIsInRequestList && elevator.movement != elevator.toBase))
                     {
                         elevator.Doors.action();
                         int indexOfCall = callbuttonList.IndexOf(callbuttonList.Where(call => call.nameint == elevator.floorNumber).FirstOrDefault());
@@ -244,13 +255,16 @@ namespace commercial_Controller
                         callList.Remove(elevator.floorNumber);
                         elevator.requestList.Remove(elevator.floorNumber);
                     }
-
-
-
-                    if (elevator.floorNumber == elevator.destinationFloor)                       
-                        //elevator has reached it's destination
+                    if (elevator.floorNumber == elevator.destinationFloor)
+                    //elevator has reached it's destination
                     {
                         elevator.Doors.action();
+
+                    }
+
+                    int tmpFloor = elevator.floorNumber;
+                    while (elevator.floorNumber == elevator.destinationFloor)                       
+                    {
                         //if all calls or requests have not been fullfilled this will catch them
                         if (callList.Count != 0)
                         {
@@ -260,7 +274,20 @@ namespace commercial_Controller
                         {
                             elevator.destinationFloor = elevator.requestList[0];
                         }
+                        if (elevator.floorNumber == elevator.destinationFloor)
+                        {
+                            if (elevator.requestList.Count != 0)
+                            {
+                                elevator.requestList.RemoveAt(0);
+                            }
+                            else
+                            {
+                                elevator.floorNumber = 0;
+                            }
+                            
+                        }
                     }
+                    elevator.floorNumber = tmpFloor;
 
                 }
                 else

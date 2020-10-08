@@ -259,36 +259,55 @@ namespace commercial_Controller
                 }
 
                 if (selectedElevator == null)//all elevators are moving away from basefloor we will selectthe one whose last request is the smallest value.
-                { 
-                    selectedColumn.onlineElevatorList.Sort((x, y) => x.requestList[x.requestList.Count-1].CompareTo(y.requestList[y.requestList.Count-1]));
-                    selectedElevator = selectedColumn.onlineElevatorList[0];
-                }
-                selectedElevator.requestList.Add(RequestedFloor);
-
-                if (selectedElevator.toBase == "UP")
                 {
-                    selectedElevator.requestList.Sort((a, b) => b.CompareTo(a));// sortdescending
+                    selectedColumn.onlineElevatorList.Sort((x, y) => x.requestList[x.requestList.Count - 1].CompareTo(y.requestList[y.requestList.Count - 1]));
+                    selectedElevator = selectedColumn.onlineElevatorList[0];
+
+                    interfaceDisplay.gotoColumn = selectedColumn.nameLetter;
+                    interfaceDisplay.gotoElevator = selectedElevator.name;
+                    interfaceDisplay.gotoRequest = RequestedFloor;
+
+                    interfaceDisplay.displaygoto();
+
+                    selectedColumn.move(selectedElevator);
+
                 }
                 else
                 {
-                    selectedElevator.requestList.Sort((a, b) => a.CompareTo(b));//sort ascending
+                    selectedElevator.requestList.Add(RequestedFloor);
+
+                    if (selectedElevator.toBase == "UP")
+                    {
+                        selectedElevator.requestList.Sort((a, b) => b.CompareTo(a));// sortdescending
+                    }
+                    else
+                    {
+                        selectedElevator.requestList.Sort((a, b) => a.CompareTo(b));//sort ascending
+                    }
+
+                    interfaceDisplay.gotoColumn = selectedColumn.nameLetter;
+                    interfaceDisplay.gotoElevator = selectedElevator.name;
+                    interfaceDisplay.gotoRequest = RequestedFloor;
+
+                    interfaceDisplay.displaygoto();
+
+
+
                 }
-
-                interfaceDisplay.gotoColumn = selectedColumn.nameLetter;
-                interfaceDisplay.gotoElevator = selectedElevator.name;
-                interfaceDisplay.gotoRequest = RequestedFloor;
-
-                interfaceDisplay.displaygoto();
+                    selectedElevator.destinationFloor = baseFloor;
+                
 
 
-                selectedElevator.destinationFloor = baseFloor;
-                selectedElevator.requestList.Add(RequestedFloor);
-                selectedColumn.move(selectedElevator);
+                    //selectedElevator.requestList.Add(baseFloor);
+
+                    selectedElevator.requestList.Add(RequestedFloor);
+                    selectedColumn.move(selectedElevator);
 
 
 
-                //selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
-                //selectedColumn.move(selectedElevator);
+                    //selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
+                    //selectedColumn.move(selectedElevator);
+                
 
                 SelectedElevator = selectedElevator;
                 SelectedColumn = selectedColumn;

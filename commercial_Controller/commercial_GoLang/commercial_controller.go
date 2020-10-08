@@ -2,6 +2,9 @@ package main
 
 func main() {
 
+	door := new(Doors)
+	door.open = true
+
 }
 
 type Battery struct {

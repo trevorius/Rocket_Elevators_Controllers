@@ -20,7 +20,7 @@
       "outputPath": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller_cs/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/trevorkitchen/.config/NuGet/NuGet.Config"
+        "/Users/trevorkitchen/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.1"
