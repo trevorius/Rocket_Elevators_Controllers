@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj": {}
+    "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller_cs/commercial_Controller.csproj": {}
   },
   "projects": {
-    "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj": {
+    "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller_cs/commercial_Controller.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj",
+        "projectUniqueName": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller_cs/commercial_Controller.csproj",
         "projectName": "commercial_Controller",
-        "projectPath": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/commercial_Controller.csproj",
+        "projectPath": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller_cs/commercial_Controller.csproj",
         "packagesPath": "/Users/trevorkitchen/.nuget/packages/",
-        "outputPath": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller/obj/",
+        "outputPath": "/Users/trevorkitchen/Desktop/codeboxx/odyssey/week_1_and_problem_solving/commercial_Controller/commercial_Controller_cs/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/trevorkitchen/.config/NuGet/NuGet.Config"

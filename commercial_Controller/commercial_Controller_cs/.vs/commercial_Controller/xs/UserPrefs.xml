@@ -1,9 +1,13 @@
-﻿<Properties>
+﻿<Properties StartupConfiguration="{0A10E983-0306-4081-8058-E6BAEA370D91}|Default">
   <MonoDevelop.Ide.Workbench>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
-          <Node name="commercial_Controller" expanded="True" selected="True" />
+          <Node name="commercial_Controller" expanded="True">
+            <Node name="commercial_Controller" expanded="True">
+              <Node name="Program.cs" selected="True" />
+            </Node>
+          </Node>
         </State>
       </Pad>
       <Pad Id="MonoDevelop.Debugger.WatchPad">

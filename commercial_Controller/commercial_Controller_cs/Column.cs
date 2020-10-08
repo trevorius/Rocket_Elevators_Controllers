@@ -291,34 +291,6 @@ namespace commercial_Controller
         {
             Console.WriteLine("going to Idle on column {0}", name);
 
-            /*
-            SET counter to 0
-    FOR every elevator of collumn
-        IF movement IS false
-            THEN
-                INCREMENT counter by +1
-        ENDIF
-    ENDFOR
-    IF counter IS 0
-        RETURN 'avoid a division by 0 on next line'
-    ENDIF SET idleFloor to(floors DIVIDED BY (counter) ROUNDED DOWN)
-        SET counter to 1
-        FOR every elevator of collumn
-            IF movement IS false
-                IF counter is 1
-                    THEN
-                        SET  destinationFloor of elevator of collumn TO Base of collumn of collumnlist of   Battery
-                ELSE
-                    SET destinationFloor of elevator of collumn  TO(idleFloor MULTIPLIES counter)
-                    INCREMENT counter by + 1
-                ENDIF
-                CALL moveElevator WITH elevator of collumn
-
-            ENDIF
-        ENDFOR
-    ENDIF
-            */
-
         }
     }
 }

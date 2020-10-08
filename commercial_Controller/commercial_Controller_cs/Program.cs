@@ -81,7 +81,8 @@ namespace commercial_Controller
                 Console.WriteLine("Column {0} serves floors from :{1} to {2} and has {3} elevators.", column.nameLetter, column.floorsServed[0], column.floorsServed[column.floorsServed.Count - 2], column.elevatorList.Count);
             }
 
-
+            Console.WriteLine("press any key to exit");
+            Console.ReadLine();
         }
         
 
