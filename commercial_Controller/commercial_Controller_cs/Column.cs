@@ -73,6 +73,8 @@ namespace commercial_Controller
                         if (elevator.movement == "IDLE")
                         {
                             selectedElevator = elevator;
+                            selectedElevator.requestList.Add(FloorNumber);
+
                         }
                     }
                     if (selectedElevator == null)
@@ -204,7 +206,7 @@ namespace commercial_Controller
 
                 if (!elevator.isElevatorFull())
                 {
-                    //sets movement directionof the elevator
+                    //sets movement direction of the elevator
                     if (elevator.destinationFloor > elevator.floorNumber)
                     {
                         elevator.movement = "UP";

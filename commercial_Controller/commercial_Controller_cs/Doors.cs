@@ -34,7 +34,7 @@ namespace commercial_Controller
                 Thread.Sleep(openTime * 1000);
             }
            
-                safeToClose = true;
+            safeToClose = true;
             
 
 
