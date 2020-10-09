@@ -129,7 +129,7 @@ namespace commercial_Controller
 
                 if (floors <= Battery.FloorsPerColumn)
                 {
-                    for (int i = 1; i <= basements; i++)
+                    for (int i = 1; i <= floors; i++)
                     {
                         floorsServed.Add(i);
                     }
