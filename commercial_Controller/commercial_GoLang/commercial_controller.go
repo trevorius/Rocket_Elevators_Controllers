@@ -185,8 +185,8 @@ func (c *Column) columnConstructor(aname int, afloorsServed []int, elevatorsPerC
 	c.nameLetter = stringValueOf(c.name)
 	//fmt.Println(c.nameLetter)
 	c.calculateToBase()
-	//c.createElevatorList()
-	//c.createCallbuttonList()
+	c.createElevatorList()
+	c.createCallbuttonList()
 }
 func (c *Column) calculateToBase() {
 	if c.floorsServed[0] < c.base {
@@ -196,9 +196,24 @@ func (c *Column) calculateToBase() {
 	}
 
 }
-func stringValueOf(i int) string {
-	var foo = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	return string(foo[i-1])
+func (c *Column) createElevatorList() {
+	for elevatorName := 1; elevatorName < c.numberOfElevators+1; elevatorName++ {
+		c.elevatorList = append(c.elevatorList, Elevator{})
+		c.elevatorList[elevatorName-1].ElevatorConstructor(elevatorName, c.toBase)
+	}
+}
+func (c *Column) createCallbuttonList() {
+	i := 0
+	for _, floor := range c.floorsServed {
+
+		j := strconv.Itoa(floor)
+		c.callButtonList = append(c.callButtonList, CallButton{})
+
+		c.callButtonList[i].name = j
+		c.callButtonList[i].nameint = floor
+		c.callButtonList[i].isPressed = false
+		i++
+	}
 }
 
 type Column struct {
@@ -219,6 +234,28 @@ type Column struct {
 	floorsServed []int
 	callList     []int
 }
+
+func (e *Elevator) ElevatorConstructor(elevatorname int, atoBase string) {
+	e.name = elevatorname
+	e.toBase = atoBase
+	e.floorNumber = 0
+	e.timer = 0
+	e.load = 100
+	e.online = true
+
+	e.doors = (Doors{
+		open:              false,
+		safeToClose:       true,
+		passengerDetector: false,
+		openTime:          5,
+	})
+	e.floorDisplay = (FloorDisplay{
+		number:    0,
+		direction: "",
+		message:   "",
+	})
+}
+
 type Elevator struct {
 	MAXLOAD int
 
@@ -268,4 +305,9 @@ type Doors struct {
 	safeToClose       bool
 	passengerDetector bool
 	openTime          int
+}
+
+func stringValueOf(i int) string {
+	var foo = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	return string(foo[i-1])
 }
