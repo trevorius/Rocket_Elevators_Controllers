@@ -57,6 +57,8 @@ ADDITIONAL REQUIREMENTS :
 # **Week 2 Mechanics of Interpreted Languages**
 # **-----------------------**
   
+PRESENTATION VIDEO AT : 
+https://www.youtube.com/watch?v=xr-P44PvHKU
 
 The second week of the Odyssey program is to convert the residential controller algorithm into interpretted languages.
 
@@ -102,6 +104,8 @@ All programs run automatically creating seperate buildings for each test scenari
 #  **-----------------------**
 
   
+PRESENTATION VIDEO AT : 
+https://www.youtube.com/watch?v=3ihblM1iTwY
 
 This week we transcribed the commercial algorythm to 2 co;piled languages: 
 
