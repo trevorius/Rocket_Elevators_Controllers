@@ -128,7 +128,7 @@ Both programs display the information the user would have via display interfaces
 - both languages include in scenario4 a full elevator situation where the user will be asked to enter a newload value below the maximum of 10000
 
 - in both languages the online status of the elevators are checked before completing the request and a list of online elevator is made allowing for on or some to deactivated for maintenance or cleaning... 
-- a Drill scenario has been included in both languages where the building alarms are toggled thereby toggling all the collumns and elevators online status. It works verry well in C#. however in Golang it seams to work only if it is the first scenario to be ran if you run it a second time(putting all elevators back online) in both languages it will show a 5th scenario if all elevators are moving away from the user.
+- a Drill scenario has been included in both languages where the building alarms are toggled thereby toggling all the collumns and elevators online status. It works verry well in C#. however it seams to work only if it is the first scenario to be run if you run it a second time(putting all elevators back online) in both languages it will show a 5th scenario if all elevators are moving away from the user.
 - In C# if you use the interface to exit the run cycle it will display last of all an example of a larger building with many more basements and calculations are made to seperate the collumns according to Rocket Elevators quotation criteria and the different information taken during the weeks.
 
 
