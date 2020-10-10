@@ -93,3 +93,43 @@ All programs run automatically creating seperate buildings for each test scenari
 - In Javascript a delayed callback function will move the idle elevators to a calculated ideal position dependant on how many elevators are Idle . in python version the go to idle function will run at the end of each similation. 
 
 - started work on a ruby file. It can run the simulations the same way as python and javascript but doesn't use the goToIdle method. 
+
+
+#  **-----------------------**
+
+#  **Week 3 Mechanics of Compiled Languages**
+
+#  **-----------------------**
+
+  
+
+This week we transcribed the commercial algorythm to 2 co;piled languages: 
+
+ **- c#**
+ **- Golang**
+
+the program is a console app in both languages that runs a simulation with a basic interface to select the scenario to run.
+
+to run the c# you can use visual studio and run it from there or you need to go to the commercial_Controller_cs folder and in the teminal use dotnet run comand to run the program.
+
+to run the Golang program go to the commercial_GoLang folder and run in the terminal commercial_controller.go file using :  go run  commercial_controller.go command.
+
+both versions contain the required methods for a modern typed building :
+
+ - **RequestElevator(FloorNumber)**
+ - **AssignElevator(RequestFloor)**
+
+to navigate the building with ease. to or from the ground floor.
+
+Both programs display the information the user would have via display interfaces on the ground floor or inside the elevators and on the floors at each elevator door.
+
+**EXTRAS**  
+
+- both languages include in scenario4 a full elevator situation where the user will be asked to enter a newload value below the maximum of 10000
+
+- in both languages the online status of the elevators are checked before completing the request and a list of online elevator is made allowing for on or some to deactivated for maintenance or cleaning... 
+- a Drill scenario has been included in both languages where the building alarms are toggled thereby toggling all the collumns and elevators online status. It works verry well in C#. however in Golang it seams to work only if it is the first scenario to be ran if you run it a second time(putting all elevators back online) in both languages it will show a 5th scenario if all elevators are moving away from the user.
+- In C# if you use the interface to exit the run cycle it will display last of all an example of a larger building with many more basements and calculations are made to seperate the collumns according to Rocket Elevators quotation criteria and the different information taken during the weeks.
+
+
+I lacked the time to implement the goToIdle calculations in this weeks project so where the method would be called it simply logs to the console that the elevators return to Idle position.

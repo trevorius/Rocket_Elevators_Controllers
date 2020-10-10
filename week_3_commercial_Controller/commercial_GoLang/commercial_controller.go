@@ -34,18 +34,12 @@ func main() {
 			return
 		}
 	}
-	/*
-		fmt.Println("To demonstrate reusability i will create a new building with the following stats : ")
-		fmt.Println(" stories : 80, basements : 22, rc is 0, 8 elevators per colomn")
 
-		finalBattery := new(Battery)
-		finalBattery.batteryConstructor(80, 22, 0, 0, 8)
+	fmt.Println("To demonstrate reusability i will create a new building with the following stats : ")
+	fmt.Println(" stories : 136, basements : 26, rc is 0, 8 elevators per colomn")
 
-		fmt.Println("floors served :")
-		for i := 0; i < len(finalBattery.floorRequestButtonList); i++ {
-			fmt.Printf(" %s", testBattery.floorRequestButtonList[i].name)
-		}
-	*/
+	finalBattery := new(Battery)
+	finalBattery.batteryConstructor(136, 26, 0, 0, 8)
 
 }
 
@@ -229,6 +223,8 @@ func (battery *Battery) setupDrill() {
 
 }
 
+//Battery Methods and struct
+
 func (b *Battery) batteryConstructor(aStories int, aBasements int, aBaseFloor int, aRc int, aElevatorsPerColumn int) {
 	b.FloorsPerColumn = 20
 	b.stories = aStories
@@ -246,12 +242,12 @@ func (b *Battery) batteryConstructor(aStories int, aBasements int, aBaseFloor in
 
 	fmt.Printf("\n there are %v basementColumns. \n", b.numberOfBasementColumns)
 	fmt.Printf("\n there are %v columns above ground", b.numberOfColumns)
-	fmt.Printf("\n floors : %v basements : %v", b.floors, b.basements)
+	fmt.Printf("\n floors : %v basements : %v \n", b.floors, b.basements)
 	//createColumnList()
 	b.createFloorRequestList()
 	b.createColumnList()
 	//will use alarm method to activate the building this may be loud SORRY
-	b.pullAlarm()
+	b.alarm = true
 	b.pullAlarm()
 }
 func (b *Battery) createColumnList() {
@@ -261,6 +257,7 @@ func (b *Battery) createColumnList() {
 }
 func (b *Battery) createAboveGroundColumns() {
 	floorsPerColumn := int(b.floors / b.numberOfColumns)
+	fmt.Printf("\n floors per column : %v \n", floorsPerColumn)
 	remFloorsPerColumn := b.floors % b.numberOfColumns
 	columnCounter := 0
 	for columnCounter < b.numberOfColumns {
@@ -294,13 +291,12 @@ func (b *Battery) createAboveGroundColumns() {
 		b.columnList[columnCounter+b.numberOfBasementColumns].columnConstructor(columnCounter+1+b.numberOfBasementColumns, floorsServed, b.elevatorsPerColumn, b.baseFloor)
 		columnCounter++
 
-		fmt.Println("\n")
-		fmt.Println(floorsServed)
-
 	}
 }
 func (b *Battery) createBasementColumns() {
 	floorsPerColumn := int(b.basements / b.numberOfBasementColumns)
+
+	fmt.Printf("\n basements Per column : %v \n", floorsPerColumn)
 	remFloorsPerColumn := b.basements % b.numberOfBasementColumns
 	columnCounter := 0
 	for columnCounter < b.numberOfBasementColumns {
@@ -350,10 +346,10 @@ func (b *Battery) createFloorRequestList() {
 		tmp1 := b.floorRequestButtonList[:b.basements]
 		tmp2 := b.floorRequestButtonList[b.basements+1:]
 		b.floorRequestButtonList = append(tmp1, tmp2...)
-		fmt.Println("floors served :")
-		for i := 0; i < len(b.floorRequestButtonList); i++ {
-			fmt.Printf(" %s", b.floorRequestButtonList[i].name)
-		}
+	}
+	fmt.Println("floors served :")
+	for i := 0; i < len(b.floorRequestButtonList); i++ {
+		fmt.Printf(" %s", b.floorRequestButtonList[i].name)
 	}
 
 }
@@ -486,6 +482,8 @@ type Battery struct {
 	selectedElevator Elevator
 }
 
+//Column Methods and struct
+
 func (c *Column) columnConstructor(aname int, afloorsServed []int, elevatorsPerColumn int, aBase int) {
 	//fmt.Println("\n create columns")
 	c.name = aname
@@ -539,7 +537,7 @@ func (c *Column) createOnlineElevatorList() {
 		}
 	}
 }
-func (c *Column) RequestElevator(FloorNumber int) { //c#55
+func (c *Column) RequestElevator(FloorNumber int) {
 	c.createOnlineElevatorList()
 	c.callList = append(c.callList, FloorNumber)
 
@@ -601,7 +599,7 @@ func (c *Column) sortElevatorByDistance(floor int, list []*Elevator) {
 	})
 
 }
-func (c *Column) move(elevator Elevator) { //c# 182
+func (c *Column) move(elevator Elevator) {
 	fmt.Printf("column %v elevator %v is on floor : %v \n", c.name, elevator.name, elevator.floorNumber)
 	if elevator.floorNumber == elevator.destinationFloor {
 		//elevator is at it's current destination, needs to check if it has other destinations lined up.
@@ -739,6 +737,8 @@ type Column struct {
 	selectedElevator *Elevator
 }
 
+//Elevator Methods and struct
+
 func (e *Elevator) ElevatorConstructor(elevatorname int, atoBase string) {
 	e.name = elevatorname
 	e.toBase = atoBase
@@ -796,6 +796,8 @@ type Elevator struct {
 	requestList []int
 }
 
+//Buttons
+
 type FloorRequestButton struct {
 	name      string
 	nameint   int
@@ -806,6 +808,8 @@ type CallButton struct {
 	nameint   int
 	isPressed bool
 }
+
+//Displays
 
 func (i *InterfaceDisplay) displaygoto() {
 	fmt.Println("\n interface displays : ")
@@ -838,6 +842,8 @@ type FloorDisplay struct {
 	message   string
 }
 
+//Doors
+
 func (d *Doors) action() {
 	d.open = true
 	fmt.Println("open Doors")
@@ -864,6 +870,8 @@ type Doors struct {
 	passengerDetector bool
 	openTime          int
 }
+
+// functions used to implement some of the data manipulation in the program
 
 func stringValueOf(i int) string {
 	var foo = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
