@@ -294,20 +294,20 @@ namespace commercial_Controller
 
 
                 }
-                    selectedElevator.destinationFloor = baseFloor;
-                
+                selectedElevator.destinationFloor = baseFloor;
+            
 
 
-                    //selectedElevator.requestList.Add(baseFloor);
+                //selectedElevator.requestList.Add(baseFloor);
 
-                    selectedElevator.requestList.Add(RequestedFloor);
-                    selectedColumn.move(selectedElevator);
+                selectedElevator.requestList.Add(RequestedFloor);
+                selectedColumn.move(selectedElevator);
 
 
 
-                    //selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
-                    //selectedColumn.move(selectedElevator);
-                
+                //selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
+                //selectedColumn.move(selectedElevator);
+            
 
                 SelectedElevator = selectedElevator;
                 SelectedColumn = selectedColumn;

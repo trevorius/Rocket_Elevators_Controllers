@@ -3,38 +3,232 @@ package main
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"time"
 )
 
 func main() {
-	//define a struct
-	door := new(Doors)
-	door.open = false
-
-	fmt.Printf("door : %v", door)
 
 	testBattery := new(Battery)
 	testBattery.batteryConstructor(66, 6, 1, 1, 5)
+	var selection string
 
-	fmt.Println("floors served :")
-	for i := 0; i < len(testBattery.floorRequestButtonList); i++ {
-		fmt.Printf(" %s", testBattery.floorRequestButtonList[i].name)
+	for selection != "leave" {
+		fmt.Println("\n select scenario to run 1 - 2 - 3 - 4 - Drill   leave")
+
+		fmt.Scan(&selection)
+
+		if selection == "1" {
+			testBattery.scenario1()
+		} else if selection == "2" {
+			testBattery.scenario2()
+		} else if selection == "3" {
+			testBattery.scenario3()
+
+		} else if selection == "4" {
+			testBattery.scenario4()
+		} else if selection == "Drill" {
+			testBattery.scenarioDrill()
+		} else if selection == "exit" {
+			return
+		}
 	}
+	/*
+		fmt.Println("To demonstrate reusability i will create a new building with the following stats : ")
+		fmt.Println(" stories : 80, basements : 22, rc is 0, 8 elevators per colomn")
 
-	fmt.Printf("\n stories = %v", testBattery.interfaceDisplay)
+		finalBattery := new(Battery)
+		finalBattery.batteryConstructor(80, 22, 0, 0, 8)
 
-	var newLoad int
-	fmt.Printf("\n enter a value lower than %v", testBattery.columnList[0].elevatorList[0].MAXLOAD)
-	fmt.Scan(&newLoad)
-
-	fmt.Println("you entered : ", newLoad)
-
-	testBattery.columnList[1].RequestElevator(10)
-	fmt.Println("\n endProgram")
-	//printed the struct for testing
+		fmt.Println("floors served :")
+		for i := 0; i < len(finalBattery.floorRequestButtonList); i++ {
+			fmt.Printf(" %s", testBattery.floorRequestButtonList[i].name)
+		}
+	*/
 
 }
+
+//Scenarios
+func (battery *Battery) scenario1() {
+	battery.setup1()
+	battery.AssignElevator(20)
+	fmt.Println("\n\n\n")
+	fmt.Printf("column %v elevator %v was selected", battery.selectedColumn.nameLetter, battery.selectedElevator.name)
+	fmt.Println("elevator B5 was expected to be sent...")
+	fmt.Println("\n\n\n")
+}
+func (battery *Battery) scenario2() {
+	battery.setup2()
+	battery.AssignElevator(36)
+	fmt.Println("\n\n\n")
+	fmt.Printf("column %v elevator %v was selected", battery.selectedColumn.nameLetter, battery.selectedElevator.name)
+	fmt.Println("elevator C1 was expected to be sent...")
+	fmt.Println("\n\n\n")
+}
+func (battery *Battery) scenario3() {
+	battery.setup3()
+	battery.columnList[3].RequestElevator(54)
+	fmt.Println("\n\n\n")
+	fmt.Printf("column %v elevator %v was selected", battery.columnList[3].nameLetter, battery.columnList[3].selectedElevator.name)
+	fmt.Println("elevator D1 was expected to be sent...")
+	fmt.Println("\n\n\n")
+}
+func (battery *Battery) scenario4() {
+	battery.setup4()
+	battery.columnList[0].RequestElevator(-3)
+
+	fmt.Println("\n\n\n")
+	fmt.Printf("column %v elevator %v was selected", battery.columnList[0].nameLetter, battery.columnList[0].selectedElevator.name)
+	fmt.Println("elevator A4 was expected to be sent...")
+	fmt.Println("\n\n\n")
+}
+func (battery *Battery) scenarioDrill() {
+	battery.pullAlarm()
+	battery.setupDrill()
+	battery.columnList[0].RequestElevator(-3)
+
+	fmt.Println("\n\n\n")
+	fmt.Println("Drill calls the alarm method thereby toggleing alarm status for the building, which in turn will toggle online status.")
+	fmt.Println(" I tried to run Request 3rd basement.. if alarm's were on you would have got an error message.\n If not an elevator should have taken you to floor -3...")
+	fmt.Println("\n\n\n")
+}
+
+func (battery *Battery) setup1() {
+	battery.columnList[1].elevatorList[0].floorNumber = 20
+	battery.columnList[1].elevatorList[0].movement = "DOWN"
+	battery.columnList[1].elevatorList[0].destinationFloor = 5
+	battery.columnList[1].elevatorList[0].requestList = append(battery.columnList[1].elevatorList[0].requestList, battery.columnList[1].elevatorList[0].destinationFloor)
+
+	battery.columnList[1].elevatorList[1].floorNumber = 3
+	battery.columnList[1].elevatorList[1].movement = "UP"
+	battery.columnList[1].elevatorList[1].destinationFloor = 15
+	battery.columnList[1].elevatorList[1].requestList = append(battery.columnList[1].elevatorList[1].requestList, battery.columnList[1].elevatorList[1].destinationFloor)
+
+	battery.columnList[1].elevatorList[2].floorNumber = 13
+	battery.columnList[1].elevatorList[2].movement = "DOWN"
+	battery.columnList[1].elevatorList[2].destinationFloor = 1
+	battery.columnList[1].elevatorList[2].requestList = append(battery.columnList[1].elevatorList[2].requestList, battery.columnList[1].elevatorList[2].destinationFloor)
+
+	battery.columnList[1].elevatorList[3].floorNumber = 15
+	battery.columnList[1].elevatorList[3].movement = "DOWN"
+	battery.columnList[1].elevatorList[3].destinationFloor = 2
+	battery.columnList[1].elevatorList[3].requestList = append(battery.columnList[1].elevatorList[3].requestList, battery.columnList[1].elevatorList[3].destinationFloor)
+
+	battery.columnList[1].elevatorList[4].floorNumber = 6
+	battery.columnList[1].elevatorList[4].movement = "DOWN"
+	battery.columnList[1].elevatorList[4].destinationFloor = 1
+	battery.columnList[1].elevatorList[4].requestList = append(battery.columnList[1].elevatorList[4].requestList, battery.columnList[1].elevatorList[4].destinationFloor)
+
+}
+func (battery *Battery) setup2() {
+	battery.columnList[2].elevatorList[0].floorNumber = 1
+	battery.columnList[2].elevatorList[0].movement = "IDLE"
+	battery.columnList[2].elevatorList[0].destinationFloor = 21
+	battery.columnList[2].elevatorList[0].requestList = append(battery.columnList[2].elevatorList[0].requestList, battery.columnList[2].elevatorList[0].destinationFloor)
+
+	battery.columnList[2].elevatorList[1].floorNumber = 23
+	battery.columnList[2].elevatorList[1].movement = "UP"
+	battery.columnList[2].elevatorList[1].destinationFloor = 28
+	battery.columnList[2].elevatorList[1].requestList = append(battery.columnList[2].elevatorList[1].requestList, battery.columnList[2].elevatorList[1].destinationFloor)
+
+	battery.columnList[2].elevatorList[2].floorNumber = 33
+	battery.columnList[2].elevatorList[2].movement = "DOWN"
+	battery.columnList[2].elevatorList[2].destinationFloor = 1
+	battery.columnList[2].elevatorList[2].requestList = append(battery.columnList[2].elevatorList[2].requestList, battery.columnList[2].elevatorList[2].destinationFloor)
+
+	battery.columnList[2].elevatorList[3].floorNumber = 40
+	battery.columnList[2].elevatorList[3].movement = "DOWN"
+	battery.columnList[2].elevatorList[3].destinationFloor = 24
+	battery.columnList[2].elevatorList[3].requestList = append(battery.columnList[2].elevatorList[3].requestList, battery.columnList[2].elevatorList[3].destinationFloor)
+
+	battery.columnList[2].elevatorList[4].floorNumber = 39
+	battery.columnList[2].elevatorList[4].movement = "DOWN"
+	battery.columnList[2].elevatorList[4].destinationFloor = 1
+	battery.columnList[2].elevatorList[4].requestList = append(battery.columnList[2].elevatorList[4].requestList, battery.columnList[2].elevatorList[4].destinationFloor)
+
+}
+func (battery *Battery) setup3() {
+	battery.columnList[3].elevatorList[0].floorNumber = 58
+	battery.columnList[3].elevatorList[0].movement = "DOWN"
+	battery.columnList[3].elevatorList[0].destinationFloor = 1
+	battery.columnList[3].elevatorList[0].requestList = append(battery.columnList[3].elevatorList[0].requestList, battery.columnList[3].elevatorList[0].destinationFloor)
+
+	battery.columnList[3].elevatorList[1].floorNumber = 50
+	battery.columnList[3].elevatorList[1].movement = "UP"
+	battery.columnList[3].elevatorList[1].destinationFloor = 60
+	battery.columnList[3].elevatorList[1].requestList = append(battery.columnList[3].elevatorList[1].requestList, battery.columnList[3].elevatorList[1].destinationFloor)
+
+	battery.columnList[3].elevatorList[2].floorNumber = 46
+	battery.columnList[3].elevatorList[2].movement = "UP"
+	battery.columnList[3].elevatorList[2].destinationFloor = 58
+	battery.columnList[3].elevatorList[2].requestList = append(battery.columnList[3].elevatorList[2].requestList, battery.columnList[3].elevatorList[2].destinationFloor)
+
+	battery.columnList[3].elevatorList[3].floorNumber = 1
+	battery.columnList[3].elevatorList[3].movement = "UP"
+	battery.columnList[3].elevatorList[3].destinationFloor = 54
+	battery.columnList[3].elevatorList[3].requestList = append(battery.columnList[3].elevatorList[3].requestList, battery.columnList[3].elevatorList[3].destinationFloor)
+
+	battery.columnList[3].elevatorList[4].floorNumber = 60
+	battery.columnList[3].elevatorList[4].movement = "DOWN"
+	battery.columnList[3].elevatorList[4].destinationFloor = 1
+	battery.columnList[3].elevatorList[4].requestList = append(battery.columnList[3].elevatorList[4].requestList, battery.columnList[3].elevatorList[4].destinationFloor)
+
+}
+func (battery *Battery) setup4() {
+	battery.columnList[0].elevatorList[0].floorNumber = -4
+	battery.columnList[0].elevatorList[0].movement = "IDLE"
+	//battery.columnList[0].elevatorList[0].destinationFloor = null;
+
+	battery.columnList[0].elevatorList[1].floorNumber = 1
+	battery.columnList[0].elevatorList[1].movement = "IDLE"
+	//battery.columnList[0].elevatorList[1].destinationFloor = null;
+
+	battery.columnList[0].elevatorList[2].floorNumber = -3
+	battery.columnList[0].elevatorList[2].movement = "DOWN"
+	battery.columnList[0].elevatorList[2].destinationFloor = -5
+	battery.columnList[0].elevatorList[2].requestList = append(battery.columnList[0].elevatorList[2].requestList, battery.columnList[0].elevatorList[2].destinationFloor)
+
+	battery.columnList[0].elevatorList[3].floorNumber = -6
+	battery.columnList[0].elevatorList[3].movement = "UP"
+	battery.columnList[0].elevatorList[3].destinationFloor = 1
+	battery.columnList[0].elevatorList[3].requestList = append(battery.columnList[0].elevatorList[3].requestList, battery.columnList[0].elevatorList[3].destinationFloor)
+
+	battery.columnList[0].elevatorList[3].load = 100000000000000000
+
+	battery.columnList[0].elevatorList[4].floorNumber = -1
+	battery.columnList[0].elevatorList[4].movement = "DOWN"
+	battery.columnList[0].elevatorList[4].destinationFloor = -6
+	battery.columnList[0].elevatorList[4].requestList = append(battery.columnList[0].elevatorList[4].requestList, battery.columnList[0].elevatorList[4].destinationFloor)
+}
+func (battery *Battery) setupDrill() {
+	battery.columnList[0].elevatorList[0].floorNumber = -4
+	battery.columnList[0].elevatorList[0].movement = "DOWN"
+	battery.columnList[0].elevatorList[0].destinationFloor = -5
+	battery.columnList[0].elevatorList[0].requestList = append(battery.columnList[0].elevatorList[0].requestList, battery.columnList[0].elevatorList[0].destinationFloor)
+
+	battery.columnList[0].elevatorList[1].floorNumber = -5
+	battery.columnList[0].elevatorList[1].movement = "DOWN"
+	battery.columnList[0].elevatorList[1].destinationFloor = -6
+	battery.columnList[0].elevatorList[1].requestList = append(battery.columnList[0].elevatorList[1].requestList, battery.columnList[0].elevatorList[1].destinationFloor)
+
+	battery.columnList[0].elevatorList[2].floorNumber = -4
+	battery.columnList[0].elevatorList[2].movement = "DOWN"
+	battery.columnList[0].elevatorList[2].destinationFloor = -6
+	battery.columnList[0].elevatorList[2].requestList = append(battery.columnList[0].elevatorList[2].requestList, battery.columnList[0].elevatorList[2].destinationFloor)
+
+	battery.columnList[0].elevatorList[3].floorNumber = -1
+	battery.columnList[0].elevatorList[3].movement = "DOWN"
+	battery.columnList[0].elevatorList[3].destinationFloor = -6
+	battery.columnList[0].elevatorList[3].requestList = append(battery.columnList[0].elevatorList[3].requestList, battery.columnList[0].elevatorList[3].destinationFloor)
+
+	battery.columnList[0].elevatorList[4].floorNumber = -2
+	battery.columnList[0].elevatorList[4].movement = "DOWN"
+	battery.columnList[0].elevatorList[4].destinationFloor = -5
+	battery.columnList[0].elevatorList[4].requestList = append(battery.columnList[0].elevatorList[4].requestList, battery.columnList[0].elevatorList[4].destinationFloor)
+
+}
+
 func (b *Battery) batteryConstructor(aStories int, aBasements int, aBaseFloor int, aRc int, aElevatorsPerColumn int) {
 	b.FloorsPerColumn = 20
 	b.stories = aStories
@@ -56,6 +250,9 @@ func (b *Battery) batteryConstructor(aStories int, aBasements int, aBaseFloor in
 	//createColumnList()
 	b.createFloorRequestList()
 	b.createColumnList()
+	//will use alarm method to activate the building this may be loud SORRY
+	b.pullAlarm()
+	b.pullAlarm()
 }
 func (b *Battery) createColumnList() {
 	b.createBasementColumns()
@@ -172,16 +369,100 @@ func (b *Battery) pullAlarm() {
 		}
 	}
 }
-func (b*Battery) selectColumn() Column{
-	for _ ,column := range   each(Column column in columnList)
-	{
-		if (column.floorsServed.Contains(floor))
-		{
-			return column;
+func (b *Battery) selectColumn(floor int) Column {
+	for _, column := range b.columnList {
+		floorIsInFloorsServed := isIntIn(floor, column.floorsServed)
+
+		if floorIsInFloorsServed {
+			return column
 		}
 	}
-	return null;
-}}
+	columnS := Column{}
+	return columnS
+}
+func (b *Battery) AssignElevator(RequestedFloor int) {
+	SelectedElevator := Elevator{}
+	var indexOfRequestedFloor int
+	if b.rc != 0 {
+		indexOfRequestedFloor = RequestedFloor + b.basements - 1
+	} else {
+		indexOfRequestedFloor = RequestedFloor + b.basements
+	}
+	b.floorRequestButtonList[indexOfRequestedFloor].isPressed = true
+
+	SelectedColumn := Column{}
+
+	SelectedColumn = b.selectColumn(RequestedFloor)
+
+	if SelectedColumn.online {
+		SelectedColumn.createOnlineElevatorList()
+
+		SelectedColumn.sortElevatorByDistance(b.baseFloor, SelectedColumn.onlineElevatorList)
+
+		for _, elevator := range SelectedColumn.onlineElevatorList {
+			if elevator.distance == 0 && elevator.movement == "IDLE" {
+				SelectedElevator = *elevator
+			}
+		}
+		if SelectedColumn.checkIfElevatorOnItsWay(b.baseFloor) {
+			SelectedElevator = *SelectedColumn.selectedElevator
+		}
+		for _, elevator := range SelectedColumn.onlineElevatorList {
+			if elevator.movement == "IDLE" {
+				SelectedElevator = *elevator
+			}
+		}
+		if SelectedElevator.movement == "" {
+			//all elevators are moving away from basefloor we will selectthe one whose last request is the smallest value.
+			fmt.Println("stop for test reasons")
+			//SelectedColumn.onlineElevatorList =
+			sort.Slice(SelectedColumn.onlineElevatorList, func(i, j int) bool {
+				return SelectedColumn.onlineElevatorList[i].requestList[len(SelectedColumn.onlineElevatorList[i].requestList)-1] < SelectedColumn.onlineElevatorList[j].requestList[len(SelectedColumn.onlineElevatorList[j].requestList)-1]
+			})
+
+			SelectedElevator = *SelectedColumn.onlineElevatorList[0]
+
+			b.interfaceDisplay.goToColumn = SelectedColumn.nameLetter
+			b.interfaceDisplay.goToElevator = SelectedElevator.name
+			b.interfaceDisplay.goToRequest = RequestedFloor
+
+			b.interfaceDisplay.displaygoto()
+
+			SelectedColumn.move(SelectedElevator)
+
+		} else {
+
+			SelectedElevator.requestList = append(SelectedElevator.requestList, RequestedFloor)
+
+			if SelectedElevator.toBase == "UP" {
+				sort.Sort(sort.Reverse(sort.IntSlice(SelectedElevator.requestList))) // sortdescending
+			} else {
+				sort.Ints(SelectedElevator.requestList) //sort ascending
+			}
+
+			b.interfaceDisplay.goToColumn = SelectedColumn.nameLetter
+			b.interfaceDisplay.goToElevator = SelectedElevator.name
+			b.interfaceDisplay.goToRequest = RequestedFloor
+
+			b.interfaceDisplay.displaygoto()
+
+		}
+		SelectedElevator.destinationFloor = b.baseFloor
+		//selectedElevator.requestList.Add(baseFloor)
+		SelectedElevator.requestList = append(SelectedElevator.requestList, RequestedFloor)
+		SelectedColumn.move(SelectedElevator)
+
+		//selectedElevator.destinationFloor = selectedElevator.requestList[selectedElevator.requestList.Count - 1];
+		//selectedColumn.move(selectedElevator);
+
+		b.selectedElevator = SelectedElevator
+		b.selectedColumn = SelectedColumn
+
+	} else {
+		b.interfaceDisplay.display("SORRY the column to your desired floor is offline.")
+	}
+
+}
 
 type Battery struct {
 	FloorsPerColumn int
@@ -200,6 +481,9 @@ type Battery struct {
 	interfaceDisplay       InterfaceDisplay
 
 	alarm bool
+
+	selectedColumn   Column
+	selectedElevator Elevator
 }
 
 func (c *Column) columnConstructor(aname int, afloorsServed []int, elevatorsPerColumn int, aBase int) {
@@ -217,7 +501,7 @@ func (c *Column) columnConstructor(aname int, afloorsServed []int, elevatorsPerC
 	c.createElevatorList()
 	c.createCallbuttonList()
 
-	c.selectedElevator = (Elevator{
+	c.selectedElevator = (&Elevator{
 		toBase: "this is a test",
 	})
 }
@@ -231,7 +515,7 @@ func (c *Column) calculateToBase() {
 }
 func (c *Column) createElevatorList() {
 	for elevatorName := 1; elevatorName < c.numberOfElevators+1; elevatorName++ {
-		c.elevatorList = append(c.elevatorList, Elevator{})
+		c.elevatorList = append(c.elevatorList, &Elevator{})
 		c.elevatorList[elevatorName-1].ElevatorConstructor(elevatorName, c.toBase)
 	}
 }
@@ -257,10 +541,12 @@ func (c *Column) createOnlineElevatorList() {
 }
 func (c *Column) RequestElevator(FloorNumber int) { //c#55
 	c.createOnlineElevatorList()
+	c.callList = append(c.callList, FloorNumber)
+
 	if len(c.onlineElevatorList) != 0 {
 		if !c.checkIfElevatorOnItsWay(FloorNumber) {
 
-			c.selectedElevator = (Elevator{})
+			c.selectedElevator = (&Elevator{})
 
 			c.sortElevatorByDistance(FloorNumber, c.onlineElevatorList)
 
@@ -276,25 +562,44 @@ func (c *Column) RequestElevator(FloorNumber int) { //c#55
 				c.selectedElevator = c.onlineElevatorList[len(c.onlineElevatorList)-1]
 				c.selectedElevator.requestList = append(c.selectedElevator.requestList, FloorNumber)
 			}
-			fmt.Println("xxxxxxxxxxxxxxxxxxxx         elevator %v was selected       xxxxxxxxxxxxxxxxxxxxx", c.selectedElevator.name)
-			c.selectedElevator.destinationFloor = c.base
-			c.move(c.selectedElevator)
+		}
+		fmt.Printf("\nxxxxxxxxxxxxxxxxxxxx         elevator %v was selected       xxxxxxxxxxxxxxxxxxxxx\n", c.selectedElevator.name)
+		c.selectedElevator.destinationFloor = c.base
+		c.move(*c.selectedElevator)
 
-		} else {
-			for _, elevator := range c.elevatorList {
-				elevator.floorDisplay.message = "OFFLINE"
-				elevator.floorDisplay.messageDisplay()
-			}
+	} else {
+		for _, elevator := range c.elevatorList {
+			elevator.floorDisplay.message = "OFFLINE"
+			elevator.floorDisplay.messageDisplay()
 		}
 
 	}
 
 }
 func (c *Column) checkIfElevatorOnItsWay(floor int) bool {
+	for _, elevator := range c.onlineElevatorList {
+		absFloorNumber := int(math.Abs(float64(elevator.floorNumber)))
+		distanceToCall := int(math.Abs(math.Abs(float64(elevator.floorNumber)) - math.Abs(float64(floor))))
+		distanceToDestination := int(math.Abs(math.Abs(float64(elevator.floorNumber)) - math.Abs(float64(elevator.destinationFloor))))
+
+		//if elevators movement takes it through floor
+		if absFloorNumber >= int(math.Abs(float64(floor))) && elevator.movement == elevator.toBase && distanceToCall <= distanceToDestination {
+			c.selectedElevator = elevator
+			return true
+		}
+	}
 	return false
 }
-func (c *Column) sortElevatorByDistance(floor int, list []Elevator) {
+func (c *Column) sortElevatorByDistance(floor int, list []*Elevator) {
 	fmt.Println("sortingElevators") //c# 172
+	for _, elevator := range list {
+		elevator.distance = int(math.Abs(math.Abs(float64(elevator.floorNumber)) - math.Abs(float64(floor))))
+
+	}
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].distance < list[j].distance
+	})
+
 }
 func (c *Column) move(elevator Elevator) { //c# 182
 	fmt.Printf("column %v elevator %v is on floor : %v \n", c.name, elevator.name, elevator.floorNumber)
@@ -425,13 +730,13 @@ type Column struct {
 	online bool
 
 	callButtonList     []CallButton
-	elevatorList       []Elevator
-	onlineElevatorList []Elevator
+	elevatorList       []*Elevator
+	onlineElevatorList []*Elevator
 
 	floorsServed []int
 	callList     []int
 
-	selectedElevator Elevator
+	selectedElevator *Elevator
 }
 
 func (e *Elevator) ElevatorConstructor(elevatorname int, atoBase string) {
@@ -501,11 +806,20 @@ type CallButton struct {
 	nameint   int
 	isPressed bool
 }
+
+func (i *InterfaceDisplay) displaygoto() {
+	fmt.Println("\n interface displays : ")
+	fmt.Printf("xxxxxxxxxxxxxxxxxxxxxx Go to column %v, elevator %v to go to floor : %v xxxxxxxxxxxxxxxxxxxxxxxxxx \n", i.goToColumn, i.goToElevator, i.goToRequest)
+}
+func (i *InterfaceDisplay) display(msg string) {
+	fmt.Println("\n Interface Displays : ", msg)
+}
+
 type InterfaceDisplay struct {
 	goTo          string
 	floorServedBy string
 	message       string
-	goToColumn    byte
+	goToColumn    string
 	goToElevator  int
 	goToRequest   int
 }
